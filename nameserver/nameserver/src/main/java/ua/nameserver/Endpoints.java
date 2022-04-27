@@ -44,4 +44,14 @@ public class Endpoints {
     public String getfileIp(@PathVariable("filename") String fileName){
         return namingServer.getFileIp(fileName);
     }
+
+    @GetMapping("/GetNeighbors/{ip}")
+    public String getNeighbors(@PathVariable("ip") String ip){
+        if(namingServer.getMapLength() < 2){
+            return "Not enough nodes in network, wait";
+        }
+        else{
+            return namingServer.getNeighbors(ip);
+        }
+    }
 }

@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import static ua.util.Functions.hashFunction;
+
 public class NameServer {
 
     /* FIELDS */
@@ -34,14 +36,14 @@ public class NameServer {
 
     /* METHODS */
     public String getFileIp(String filePath) {
-        int fileHash = Functions.hashFunction((filePath));
+        int fileHash = hashFunction((filePath));
         // int requiredIpHash = ipMap.keySet().stream().map(s -> abs(s - fileHash)).min(Integer::compare).get();
         int min_diff = 32768;
         String ip = "";
         int diff;
-        for (int key : ipMap.keySet()){
+        for (int key : ipMap.keySet()) {
             diff = Math.abs(key - fileHash);
-            if (diff < min_diff){
+            if (diff < min_diff) {
                 min_diff = diff;
                 ip = ipMap.get(key);
             }
@@ -50,15 +52,15 @@ public class NameServer {
     }
 
     public void addIp(String ip) {
-        ipMap.put(Functions.hashFunction(ip), ip);
+        ipMap.put(hashFunction(ip), ip);
     }
 
     public void removeIp(String ip) {
-        ipMap.remove(Functions.hashFunction((ip)));
+        ipMap.remove(hashFunction((ip)));
     }
 
-    public boolean ipCheck(String ip){
-        return ipMap.containsKey(Functions.hashFunction((ip)));
+    public boolean ipCheck(String ip) {
+        return ipMap.containsKey(hashFunction((ip)));
     }
 
     private void saveHashMap() {
@@ -100,12 +102,39 @@ public class NameServer {
             }
 
             if (json != null) {
-                ipMap = mapper.readValue(json, new TypeReference<>() {});
+                ipMap = mapper.readValue(json, new TypeReference<>() {
+                });
             } else {
                 ipMap = new HashMap<>();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getMapLength() {
+        return ipMap.size();
+    }
+
+    public String getNeighbors(String ip) {
+        int hash = hashFunction(ip);
+        String prev_node = null;
+        String next_node = null;
+        Object[] keys = ipMap.keySet().toArray();
+        for (int i = 0; i < keys.length; i++) {
+            if (hash == (int) keys[i]) {
+                if (i == 0) {
+                    prev_node = ipMap.get((int) keys[keys.length - 1]);
+                } else {
+                    prev_node = ipMap.get((int) keys[i - 1]);
+                }
+                if (i == keys.length - 1) {
+                    next_node = ipMap.get((int) keys[0]);
+                } else {
+                    next_node = ipMap.get((int) keys[i + 1]);
+                }
+            }
+        }
+        return prev_node + ";" + next_node;
     }
 }
