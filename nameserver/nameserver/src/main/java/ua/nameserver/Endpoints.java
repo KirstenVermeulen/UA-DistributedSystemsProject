@@ -30,7 +30,8 @@ public class Endpoints {
     }
 
     @GetMapping("/ExitNetwork/{ip}")
-    public ResponseEntity<String> exitNetworkByIP(@PathVariable("ip") String ip){
+    public ResponseEntity<String> exitNetworkByIP(HttpServletRequest request){
+        String ip = request.getRemoteAddr();
         if (namingServer.ipCheck(ip)){
             namingServer.removeIp(ip);
             System.out.println(ip + " has quit the network");
