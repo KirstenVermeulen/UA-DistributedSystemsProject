@@ -29,7 +29,7 @@ public class Endpoints {
         return new ResponseEntity<>("Successfully joined the network", HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/ExitNetwork/{ip}")
+    @GetMapping("/ExitNetwork/")
     public ResponseEntity<String> exitNetworkByIP(HttpServletRequest request){
         String ip = request.getRemoteAddr();
         if (namingServer.ipCheck(ip)){
