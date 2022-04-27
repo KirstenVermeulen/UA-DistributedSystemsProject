@@ -61,4 +61,8 @@ public class Node {
     public void nodeJoined(String name, String ipAddress) {
 
     }
+
+    public void redButton(){
+
+    }
 }
