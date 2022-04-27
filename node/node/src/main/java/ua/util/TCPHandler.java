@@ -4,11 +4,11 @@ import java.io.*;
 import java.net.*;
 
 // ClientHandler class
-public class TCPClientHandler implements Runnable {
+public class TCPHandler implements Runnable {
     private final Socket clientSocket;
 
     // Constructor
-    public TCPClientHandler(Socket socket)
+    public TCPHandler(Socket socket)
     {
         this.clientSocket = socket;
     }
@@ -29,6 +29,8 @@ public class TCPClientHandler implements Runnable {
 
             // get the outputstream of client
             out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+            // TODO: Handle message received from client
 
             // get the inputstream of client
             in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));

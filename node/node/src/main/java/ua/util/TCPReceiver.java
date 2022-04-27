@@ -3,12 +3,12 @@ package ua.util;
 import java.net.*;
 import java.io.*;
 
-public class TCPServer {
+public class TCPReceiver extends Thread {
     public void run() {
         try {
 
             // Setup server
-            int serverPort = 4020;
+            int serverPort = Constants.PORT;
             ServerSocket server = new ServerSocket(serverPort);
 
             while(true) {
@@ -21,17 +21,13 @@ public class TCPServer {
                 System.out.println("New client connected: " + client.getInetAddress().getHostAddress());
 
                 // create a new thread object
-                TCPClientHandler clientSock = new TCPClientHandler(client);
+                TCPHandler clientSock = new TCPHandler(client);
 
                 // This thread will handle the client separately
                 new Thread(clientSock).start();
             }
-        }
-        catch(UnknownHostException ex) {
+        } catch(IOException ex) {
             ex.printStackTrace();
-        }
-        catch(IOException e){
-            e.printStackTrace();
         }
     }
 

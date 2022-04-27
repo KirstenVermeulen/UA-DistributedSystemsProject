@@ -1,7 +1,12 @@
 package ua.node;
 
+import ua.util.Constants;
+import ua.util.Hashing;
 import ua.util.MulticastPublisher;
-import ua.util.MulticastReceiver;
+import ua.util.TCPSender;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class Node {
 
@@ -12,15 +17,24 @@ public class Node {
     private String previousNode;
     private String nextNode;
 
+    private int currentHash;
+    private int previousHash = -1;
+    private int nextHash = -1;
+
     private String nodeName;
 
     private MulticastPublisher publisher;
+    private TCPSender tcpSender;
 
     // --- CONSTRUCTOR --- //
     private Node() {
         // TODO: Generate unique name
         nodeName = "Node 1";
+        currentHash = Hashing.hash(nodeName);
+
         publisher = new MulticastPublisher();
+        tcpSender = new TCPSender();
+
         discovery();
     }
 
@@ -32,25 +46,6 @@ public class Node {
         return Node.instance;
     }
 
-    // --- GETTERS & SETTERS --- //
-
-    public String getPreviousNode() {
-        return previousNode;
-    }
-
-    public void setPreviousNode(String previousNode) {
-        this.previousNode = previousNode;
-    }
-
-    public String getNextNode() {
-        return nextNode;
-    }
-
-    public void setNextNode(String nextNode) {
-        this.nextNode = nextNode;
-    }
-
-
     // --- METHODS --- //
 
     private void discovery() {
@@ -59,7 +54,31 @@ public class Node {
     }
 
     public void nodeJoined(String name, String ipAddress) {
+        int hash = Hashing.hash(name);
 
+        if (nextHash < 0 || (hash < nextHash && hash > currentHash)) {
+            nextHash = hash;
+
+            try {
+                tcpSender.startConnection(ipAddress, Constants.PORT);
+                tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
+                tcpSender.stopConnection();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (previousHash < 0 || (hash > previousHash && hash < currentHash)) {
+            previousHash = hash;
+
+            try {
+                tcpSender.startConnection(ipAddress, Constants.PORT);
+                tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
+                tcpSender.stopConnection();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void redButton(){

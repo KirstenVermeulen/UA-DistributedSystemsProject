@@ -1,19 +1,18 @@
 package ua.node;
 
-import ua.util.MulticastPublisher;
 import ua.util.MulticastReceiver;
-import ua.util.TCPClient;
-import ua.util.TCPServer;
+import ua.util.TCPReceiver;
 
 public class Main {
     public static void main(String[] args)  {
 
+        // --- Multicast listener thread --- //
         MulticastReceiver receiver = new MulticastReceiver();
-        TCPServer server = new TCPServer();
-        TCPClient client = new TCPClient();
-
         receiver.start();
-        server.run();
-        client.run();
+
+        // --- TCP listener thread --- //
+        TCPReceiver server = new TCPReceiver();
+        server.start();
+
     }
 }
