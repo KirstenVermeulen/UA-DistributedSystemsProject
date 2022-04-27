@@ -2,7 +2,7 @@ package ua.nameserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ua.util.Functions;
+import ua.util.Hashing;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import static ua.util.Functions.hashFunction;
+import static ua.util.Hashing.hash;
 
 public class NameServer {
 
@@ -36,7 +36,7 @@ public class NameServer {
 
     /* METHODS */
     public String getFileIp(String filePath) {
-        int fileHash = hashFunction((filePath));
+        int fileHash = hash((filePath));
         // int requiredIpHash = ipMap.keySet().stream().map(s -> abs(s - fileHash)).min(Integer::compare).get();
         int min_diff = 32768;
         String ip = "";
@@ -52,15 +52,15 @@ public class NameServer {
     }
 
     public void addIp(String ip) {
-        ipMap.put(hashFunction(ip), ip);
+        ipMap.put(hash(ip), ip);
     }
 
     public void removeIp(String ip) {
-        ipMap.remove(hashFunction((ip)));
+        ipMap.remove(hash((ip)));
     }
 
     public boolean ipCheck(String ip) {
-        return ipMap.containsKey(hashFunction((ip)));
+        return ipMap.containsKey(hash((ip)));
     }
 
     private void saveHashMap() {
@@ -117,7 +117,7 @@ public class NameServer {
     }
 
     public String getNeighbors(String ip) {
-        int hash = hashFunction(ip);
+        int hash = hash(ip);
         String prev_node = null;
         String next_node = null;
         Object[] keys = ipMap.keySet().toArray();

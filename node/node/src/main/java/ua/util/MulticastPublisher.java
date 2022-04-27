@@ -9,13 +9,15 @@ public class MulticastPublisher {
     private byte[] buffer;
 
     public void publishName(String name) {
-        multicast(name);
+        multicast("JOIN", name);
     }
 
-    public void multicast(String multicastMessage) {
+    public void multicast(String type, String message) {
         try {
             socket = new DatagramSocket();
             group = InetAddress.getByName("230.0.0.0");
+
+            String multicastMessage = String.format("%s:%s", type, message);
             buffer = multicastMessage.getBytes();
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, 4446);

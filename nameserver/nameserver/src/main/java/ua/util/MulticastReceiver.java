@@ -1,7 +1,5 @@
 package ua.util;
 
-import ua.node.Node;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -24,23 +22,25 @@ public class MulticastReceiver extends Thread {
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
+                String received = new String(packet.getData(), 0, packet.getLength());
 
-                String[] msg = new String(packet.getData(), packet.getOffset(), packet.getLength()).split(":");
+                String address = String.valueOf(packet.getAddress());
+                String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
 
-                if (msg[0].equals("END")) {
+                if ("end".equals(received)) {
                     break;
-                } else if (msg[0].equals("JOIN")) {
-                    Node.getInstance().nodeJoined(msg[1], String.valueOf(packet.getAddress()));
-                } else {
-                    System.out.println("Not a valid type");
                 }
-            }
 
+                System.out.println("message address: " + address);
+                System.out.println("message content: " + msg);
+            }
             socket.leaveGroup(group);
             socket.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
+
 }

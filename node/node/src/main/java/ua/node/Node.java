@@ -7,6 +7,8 @@ public class Node {
 
     // --- FIELDS --- //
 
+    private static Node instance = null;
+
     private String previousNode;
     private String nextNode;
 
@@ -14,25 +16,49 @@ public class Node {
 
     private MulticastPublisher publisher;
 
-
     // --- CONSTRUCTOR --- //
-    public Node() {
+    private Node() {
         // TODO: Generate unique name
         nodeName = "Node 1";
-
         publisher = new MulticastPublisher();
-
-        MulticastReceiver receiver = new MulticastReceiver();
-        receiver.start();
-    }
-
-    // --- METHODS --- //
-    public void run() {
         discovery();
     }
+
+    public static Node getInstance() {
+        if (Node.instance == null) {
+            Node.instance = new Node();
+        }
+
+        return Node.instance;
+    }
+
+    // --- GETTERS & SETTERS --- //
+
+    public String getPreviousNode() {
+        return previousNode;
+    }
+
+    public void setPreviousNode(String previousNode) {
+        this.previousNode = previousNode;
+    }
+
+    public String getNextNode() {
+        return nextNode;
+    }
+
+    public void setNextNode(String nextNode) {
+        this.nextNode = nextNode;
+    }
+
+
+    // --- METHODS --- //
 
     private void discovery() {
         System.out.println("Publish");
         publisher.publishName(nodeName);
+    }
+
+    public void nodeJoined(String name, String ipAddress) {
+
     }
 }
