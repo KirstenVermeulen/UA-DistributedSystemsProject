@@ -23,8 +23,7 @@ public class TCPSender {
         try {
             String msg = String.format("%s:%s", type, content);
             out.println(msg);
-            String resp = in.readLine();
-            return resp;
+            return in.readLine();
         } catch (IOException e) {
             e.printStackTrace();
             return null;

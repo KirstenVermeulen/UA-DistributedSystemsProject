@@ -8,8 +8,7 @@ public class TCPReceiver extends Thread {
         try {
 
             // Setup server
-            int serverPort = Constants.PORT;
-            ServerSocket server = new ServerSocket(serverPort);
+            ServerSocket server = new ServerSocket(Constants.PORT);
 
             while(true) {
                 System.out.println("Waiting for client on port " + server.getLocalPort() + "...");
