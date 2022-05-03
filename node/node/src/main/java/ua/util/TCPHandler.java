@@ -25,9 +25,6 @@ public class TCPHandler implements Runnable {
             in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-
-            // TODO: Handle message received from client
-
             String line;
             while ((line = in.readLine()) != null) {
 

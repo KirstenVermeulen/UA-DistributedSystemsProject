@@ -2,12 +2,8 @@ package ua.nameserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import ua.util.Hashing;
 import ua.util.TCPSender;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,23 +14,18 @@ import static ua.util.Hashing.hash;
 
 public class NameServer {
 
-    /* FIELDS */
+    // --- FIELDS --- //
 
     private static NameServer instance = null;
 
     private HashMap<Integer, String> ipMap = new HashMap<>();
-    private TCPSender tcpSender;
-    /* CONSTRUCTOR (SINGLETON) */
 
+    private TCPSender tcpSender;
+
+    // --- CONSTRUCTOR (SINGLETON) --- //
 
     private NameServer() {
-        /* Testing values */
-        ipMap.put(100, "testipadress");
         tcpSender = new TCPSender();
-    }
-
-    public TCPSender getTcpSender() {
-        return tcpSender;
     }
 
     public static NameServer getInstance() {
@@ -44,8 +35,14 @@ public class NameServer {
         return NameServer.instance;
     }
 
+    // --- GETTER --- //
 
-    /* METHODS */
+    public TCPSender getTcpSender() {
+        return tcpSender;
+    }
+
+    // --- METHODS --- //
+
     public String getFileIp(String filePath) {
         int fileHash = hash((filePath));
         // int requiredIpHash = ipMap.keySet().stream().map(s -> abs(s - fileHash)).min(Integer::compare).get();

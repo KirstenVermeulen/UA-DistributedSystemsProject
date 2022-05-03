@@ -22,20 +22,15 @@ public class TCPSender {
         }
     }
 
-    public String sendMessage(String type, String content) {
-        try {
-            String msg = String.format("%s:%s", type, content);
-            out.println(msg);
-            String resp = in.readLine();
-            return resp;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public void sendMessage(String type, String content) {
+        String msg = String.format("%s:%s", type, content);
+        out.println(msg);
     }
 
     public void stopConnection() {
         try {
+            sendMessage("END", "");
+
             in.close();
             out.close();
             clientSocket.close();

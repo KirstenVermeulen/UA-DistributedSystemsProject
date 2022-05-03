@@ -5,13 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/NameServer")
 public class Endpoints {
 
-    private final AtomicLong counter = new AtomicLong();
     private NameServer namingServer = NameServer.getInstance();
 
     @PutMapping("/UpdateServerFiles")
@@ -60,8 +58,8 @@ public class Endpoints {
     @GetMapping("/GetNeighbors")
     public String getNeighbors(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
-        if (namingServer.getMapLength() < 2) {
-            return "Not enough nodes in network, wait/n";
+        if (namingServer.getMapLength() < 1) {
+            return "Not enough nodes in network, wait\n";
         } else {
             return namingServer.getNeighbors(ip);
         }

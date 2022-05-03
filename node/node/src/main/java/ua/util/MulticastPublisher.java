@@ -4,9 +4,20 @@ import java.io.IOException;
 import java.net.*;
 
 public class MulticastPublisher {
+
+    // --- FIELDS --- //
+
     private DatagramSocket socket;
     private InetAddress group;
     private byte[] buffer;
+
+    // --- CONSTRUCTOR --- //
+
+    public MulticastPublisher() {
+    }
+
+
+    // --- METHODS --- //
 
     public void publishName(String name) {
         multicast("JOIN", name);
@@ -22,6 +33,7 @@ public class MulticastPublisher {
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, 4446);
             socket.send(packet);
+
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();

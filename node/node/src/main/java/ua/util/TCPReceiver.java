@@ -10,7 +10,7 @@ public class TCPReceiver extends Thread {
             ServerSocket server = new ServerSocket(Constants.PORT);
 
             while(true) {
-                System.out.println("Waiting for client on port " + server.getLocalPort() + "...");
+                System.out.println("TCP listener started (" + server.getLocalPort() + ")");
 
                 // Wait for client to connect
                 Socket client = server.accept();

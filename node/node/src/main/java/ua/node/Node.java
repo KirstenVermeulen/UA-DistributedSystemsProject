@@ -40,6 +40,7 @@ public class Node {
             nodeName = "BadNodeName";
             e.printStackTrace();
         }
+
         currentHash = Hashing.hash(nodeName);
 
         publisher = new MulticastPublisher();
@@ -74,7 +75,6 @@ public class Node {
     // --- METHODS --- //
 
     private void discovery() {
-        System.out.println("Publish");
         publisher.publishName(nodeName);
     }
 
@@ -109,7 +109,6 @@ public class Node {
     }
 
     public void checkIfAlone(int numberOfNodes){
-
         if (numberOfNodes < 2) {
             try {
                 previousNode = InetAddress.getLocalHost().getHostAddress();
@@ -121,7 +120,6 @@ public class Node {
     }
 
     public void failure(String failedNode) {
-
         // Remove Node from network
         HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver  + "/NameServer/ExitNetwork/" + failedNode))
                 .header("accept", "application/json")

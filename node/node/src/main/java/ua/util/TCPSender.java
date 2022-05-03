@@ -7,9 +7,19 @@ import java.net.*;
 
 public class TCPSender {
 
+    // --- FIELDS --- //
+
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
+
+    // --- CONSTRUCTOR --- //
+
+    public TCPSender() {
+    }
+
+
+    // --- METHODS --- //
 
     public void startConnection(String ip, int port) {
         try {
@@ -22,19 +32,15 @@ public class TCPSender {
         }
     }
 
-    public String sendMessage(String type, String content) {
-        try {
-            String msg = String.format("%s:%s", type, content);
-            out.println(msg);
-            return in.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public void sendMessage(String type, String content) {
+        String msg = String.format("%s:%s", type, content);
+        out.println(msg);
     }
 
     public void stopConnection() {
         try {
+            sendMessage("END", "");
+
             in.close();
             out.close();
             clientSocket.close();
