@@ -16,13 +16,13 @@ public class Endpoints {
 
     @PutMapping("/UpdateServerFiles")
     @ResponseStatus(code = HttpStatus.OK, reason = "OK")
-    public ResponseEntity<String> updateServerFiles(){
+    public ResponseEntity<String> updateServerFiles() {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/JoinNetwork")
 //    @ResponseStatus(code = HttpStatus.OK, reason = "OK")
-    public ResponseEntity<String> joinNetwork(HttpServletRequest request){
+    public ResponseEntity<String> joinNetwork(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         System.out.println(ip + " has joined the network");
         namingServer.addIp(ip);
@@ -30,9 +30,20 @@ public class Endpoints {
     }
 
     @GetMapping("/ExitNetwork/")
-    public ResponseEntity<String> exitNetworkByIP(HttpServletRequest request){
+    public ResponseEntity<String> exitNetworkByIP(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
-        if (namingServer.ipCheck(ip)){
+        if (namingServer.ipCheck(ip)) {
+            namingServer.removeIp(ip);
+            System.out.println(ip + " has quit the network");
+            return new ResponseEntity<>("Successfully exited the network", HttpStatus.ACCEPTED);
+        }
+        System.out.println(ip + " is not in the network");
+        return new ResponseEntity<>("Found nothing to remove", HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/ExitNetwork/{ip}")
+    public ResponseEntity<String> exitNetworkByIPInput(@PathVariable("ip") String ip) {
+        if (namingServer.ipCheck(ip)) {
             namingServer.removeIp(ip);
             System.out.println(ip + " has quit the network");
             return new ResponseEntity<>("Successfully exited the network", HttpStatus.ACCEPTED);
@@ -42,17 +53,16 @@ public class Endpoints {
     }
 
     @GetMapping("/GetFileIp/{filename}")
-    public String getfileIp(@PathVariable("filename") String fileName){
+    public String getfileIp(@PathVariable("filename") String fileName) {
         return namingServer.getFileIp(fileName);
     }
 
     @GetMapping("/GetNeighbors")
-    public String getNeighbors(HttpServletRequest request){
+    public String getNeighbors(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
-        if(namingServer.getMapLength() < 2){
+        if (namingServer.getMapLength() < 2) {
             return "Not enough nodes in network, wait/n";
-        }
-        else{
+        } else {
             return namingServer.getNeighbors(ip);
         }
     }
