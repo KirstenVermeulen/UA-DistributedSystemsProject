@@ -146,6 +146,9 @@ public class NameServer {
                 }
             }
         }
-        return prev_node + ";" + next_node;
+        return "{" +
+                "\"previous_node\": \"" + prev_node + "\"," +
+                "\"next_node\": \"" + next_node + "\"" +
+                "}";
     }
 }

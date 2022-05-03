@@ -6,7 +6,6 @@ import java.io.*;
 public class TCPReceiver extends Thread {
     public void run() {
         try {
-
             // Setup server
             ServerSocket server = new ServerSocket(Constants.PORT);
 
@@ -29,6 +28,4 @@ public class TCPReceiver extends Thread {
             ex.printStackTrace();
         }
     }
-
-
 }
