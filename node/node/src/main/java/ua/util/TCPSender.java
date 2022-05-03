@@ -1,5 +1,7 @@
 package ua.util;
 
+import ua.node.Node;
+
 import java.io.*;
 import java.net.*;
 
@@ -15,6 +17,7 @@ public class TCPSender {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
+            Node.getInstance().failure(ip);
             e.printStackTrace();
         }
     }

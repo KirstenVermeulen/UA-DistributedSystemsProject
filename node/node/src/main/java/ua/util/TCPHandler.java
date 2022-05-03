@@ -40,6 +40,7 @@ public class TCPHandler implements Runnable {
                 } else if (msg[0].equals("NEXT")) {
                     Node.getInstance().setNextNode(msg[1]);
                 } else if (msg[0].equals("NUMBEROFNODES")) {
+                    Node.getInstance().setNameserver(clientSocket.getInetAddress().getHostAddress());
                     Node.getInstance().checkIfAlone(Integer.parseInt(msg[1]));
                 } else {
                     System.out.println("Not a valid packet type");
