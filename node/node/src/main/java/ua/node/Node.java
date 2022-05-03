@@ -1,12 +1,16 @@
 package ua.node;
 
-import ua.util.Constants;
-import ua.util.Hashing;
-import ua.util.MulticastPublisher;
-import ua.util.TCPSender;
+import ua.HTTP.ExitNetwork;
+import ua.HTTP.GetNeighbors;
+import ua.HTTP.JsonBodyHandler;
+import ua.util.*;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.IOException;
+import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.function.Supplier;
 
 public class Node {
 
@@ -16,6 +20,7 @@ public class Node {
 
     private String previousNode;
     private String nextNode;
+    private String nameserver;
 
     private int currentHash;
     private int previousHash = -1;
@@ -25,6 +30,7 @@ public class Node {
 
     private MulticastPublisher publisher;
     private TCPSender tcpSender;
+    private HttpClient httpClient;
 
     // --- CONSTRUCTOR --- //
     private Node() {
@@ -38,6 +44,7 @@ public class Node {
 
         publisher = new MulticastPublisher();
         tcpSender = new TCPSender();
+        httpClient = HttpClient.newHttpClient();
 
         discovery();
     }
@@ -58,6 +65,10 @@ public class Node {
 
     public void setNextNode(String nextNode) {
         this.nextNode = nextNode;
+    }
+
+    public void setNameserver(String nameserver) {
+        this.nameserver = nameserver;
     }
 
     // --- METHODS --- //
@@ -98,6 +109,7 @@ public class Node {
     }
 
     public void checkIfAlone(int numberOfNodes){
+
         if (numberOfNodes < 2) {
             try {
                 previousNode = InetAddress.getLocalHost().getHostAddress();
@@ -106,5 +118,34 @@ public class Node {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void failure(String failedNode) {
+
+        // Remove Node from network
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver  + "/NameServer/ExitNetwork/" + failedNode))
+                .header("accept", "application/json")
+                .build();
+        try {
+            HttpResponse<Supplier<ExitNetwork>> response = httpClient.send(request, new JsonBodyHandler<>(ExitNetwork.class));
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Create a request
+        request = HttpRequest.newBuilder(URI.create("http://" + nameserver  + "/NameServer/GetNeighbors"))
+                .header("accept", "application/json")
+                .build();
+
+        // Use the client to send the request
+        try {
+            HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
+
+            System.out.println(response.body().get().next_node);
+            System.out.println(response.body().get().previous_node);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
