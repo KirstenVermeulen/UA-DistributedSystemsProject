@@ -81,6 +81,8 @@ public class Node {
         }
     }
 
+
+    // Shutdown logica
     public void redButton(){
 
     }
