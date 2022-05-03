@@ -46,8 +46,9 @@ public class Endpoints {
         return namingServer.getFileIp(fileName);
     }
 
-    @GetMapping("/GetNeighbors/{ip}")
-    public String getNeighbors(@PathVariable("ip") String ip){
+    @GetMapping("/GetNeighbors")
+    public String getNeighbors(HttpServletRequest request){
+        String ip = request.getRemoteAddr();
         if(namingServer.getMapLength() < 2){
             return "Not enough nodes in network, wait/n";
         }
