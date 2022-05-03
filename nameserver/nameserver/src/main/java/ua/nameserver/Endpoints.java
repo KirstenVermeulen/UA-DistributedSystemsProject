@@ -49,7 +49,7 @@ public class Endpoints {
     @GetMapping("/GetNeighbors/{ip}")
     public String getNeighbors(@PathVariable("ip") String ip){
         if(namingServer.getMapLength() < 2){
-            return "Not enough nodes in network, wait";
+            return "Not enough nodes in network, wait/n";
         }
         else{
             return namingServer.getNeighbors(ip);
