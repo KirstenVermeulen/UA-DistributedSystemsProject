@@ -50,6 +50,16 @@ public class Node {
         return Node.instance;
     }
 
+    // --- SETTERS --- //
+
+    public void setPreviousNode(String previousNode) {
+        this.previousNode = previousNode;
+    }
+
+    public void setNextNode(String nextNode) {
+        this.nextNode = nextNode;
+    }
+
     // --- METHODS --- //
 
     private void discovery() {
@@ -63,6 +73,7 @@ public class Node {
         if (nextHash < 0 || (hash < nextHash && hash > currentHash)) {
             nextHash = hash;
 
+            // Respond to the node
             try {
                 tcpSender.startConnection(ipAddress, Constants.PORT);
                 tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
@@ -75,6 +86,7 @@ public class Node {
         if (previousHash < 0 || (hash > previousHash && hash < currentHash)) {
             previousHash = hash;
 
+            // Respond to the node
             try {
                 tcpSender.startConnection(ipAddress, Constants.PORT);
                 tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
@@ -85,9 +97,14 @@ public class Node {
         }
     }
 
-
-    // Shutdown logica
-    public void redButton(){
-
+    public void checkIfAlone(int numberOfNodes){
+        if (numberOfNodes < 2) {
+            try {
+                previousNode = InetAddress.getLocalHost().getHostAddress();
+                nextNode = InetAddress.getLocalHost().getHostAddress();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

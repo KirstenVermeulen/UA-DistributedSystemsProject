@@ -1,5 +1,7 @@
 package ua.util;
 
+import ua.node.Node;
+
 import java.io.*;
 import java.net.*;
 
@@ -17,30 +19,32 @@ public class TCPHandler implements Runnable {
     {
         PrintWriter out = null;
         BufferedReader in = null;
+
         try {
 
-            // Setup file to share
-            byte b[] = new byte[2000];  // needs to be bigger than filesize
-            FileInputStream fileInputStream = new FileInputStream("D:\\Send.txt");
-            fileInputStream.read(b, 0, b.length);
-
-            // Write the file to the output stream
-            clientSocket.getOutputStream().write(b, 0, b.length);
-
-            // get the outputstream of client
+            in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            // TODO: Handle message received from client
 
-            // get the inputstream of client
-            in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
+            // TODO: Handle message received from client
 
             String line;
             while ((line = in.readLine()) != null) {
 
-                // writing the received message from client
-                System.out.printf("Sent from the client: %s\n", line);
-                out.println(line);
+                String[] msg = line.split(":");
+
+                if (msg[0].equals("END")) {
+                    break;
+                } else if (msg[0].equals("PREVIOUS")) {
+                    Node.getInstance().setPreviousNode(msg[1]);
+                } else if (msg[0].equals("NEXT")) {
+                    Node.getInstance().setNextNode(msg[1]);
+                } else if (msg[0].equals("NUMBEROFNODES")) {
+                    Node.getInstance().checkIfAlone(Integer.parseInt(msg[1]));
+                } else {
+                    System.out.println("Not a valid packet type");
+                }
+
             }
         }
         catch (IOException e) {
