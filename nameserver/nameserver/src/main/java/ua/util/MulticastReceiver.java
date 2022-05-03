@@ -30,11 +30,9 @@ public class MulticastReceiver extends Thread {
                 // type:message
                 if (msg[0].equals("END")) {
                     break;
-                } else if (msg[0].equals("JOIN"))
-                {
+                } else if (msg[0].equals("JOIN")) {
                     NameServer.getInstance().addIp(msg[1]);
-                    NameServer.getInstance().getTcpSender().sendMessage("NumberNodes",String.valueOf(NameServer.getInstance().getMapLength()));
-
+                    NameServer.getInstance().getTcpSender().sendMessage("NumberNodes", String.valueOf(NameServer.getInstance().getMapLength()));
                 } else {
                     System.out.println("Not a valid packet type");
                 }

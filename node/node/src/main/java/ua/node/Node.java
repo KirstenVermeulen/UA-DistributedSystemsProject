@@ -69,7 +69,7 @@ public class Node {
 
     public void nodeJoined(String name, String ipAddress) {
         int hash = Hashing.hash(name);
-
+        ipAddress = ipAddress.replace("/", "");
         if (nextHash < 0 || (hash < nextHash && hash > currentHash)) {
             nextHash = hash;
 
