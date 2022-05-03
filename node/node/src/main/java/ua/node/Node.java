@@ -28,8 +28,12 @@ public class Node {
 
     // --- CONSTRUCTOR --- //
     private Node() {
-        // TODO: Generate unique name
-        nodeName = "Node 1";
+        try {
+            nodeName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            nodeName = "BadNodeName";
+            e.printStackTrace();
+        }
         currentHash = Hashing.hash(nodeName);
 
         publisher = new MulticastPublisher();
