@@ -7,8 +7,7 @@ import ua.util.TCPSender;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 import static ua.util.Hashing.hash;
 
@@ -70,8 +69,30 @@ public class NameServer {
         return json;
     }
 
+    private static HashMap sortValues(HashMap map)
+    {
+        List list = new LinkedList(map.entrySet());
+        //Custom Comparator
+        Collections.sort(list, new Comparator()
+        {
+            public int compare(Object o1, Object o2)
+            {
+                return ((Comparable) ((Map.Entry) (o1)).getKey()).compareTo(((Map.Entry) (o2)).getKey());
+            }
+        });
+        //copying the sorted list in HashMap to preserve the iteration order
+        HashMap sortedHashMap = new LinkedHashMap();
+        for (Iterator it = list.iterator(); it.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            sortedHashMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedHashMap;
+    }
+
     public void addIp(String ip) {
         ipMap.put(hash(ip), ip);
+        ipMap = sortValues(ipMap);
     }
 
     public void removeIp(String ip) {
