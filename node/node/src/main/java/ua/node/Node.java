@@ -130,18 +130,31 @@ public class Node {
             e.printStackTrace();
         }
 
-        // Create a request
+        // Get my new neighbors
         request = HttpRequest.newBuilder(URI.create("http://" + nameserver  + "/NameServer/GetNeighbors"))
                 .header("accept", "application/json")
                 .build();
 
-        // Use the client to send the request
         try {
             HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
 
             System.out.println(response.body().get().next_node);
             System.out.println(response.body().get().previous_node);
+
+            this.previousNode = response.body().get().previous_node;
+            this.nextNode = response.body().get().next_node;
+
         } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Notify my next neighbor
+
+        try {
+            tcpSender.startConnection(nextNode, Constants.PORT);
+            tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
+            tcpSender.stopConnection();
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
 
