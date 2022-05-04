@@ -40,7 +40,6 @@ public class TCPSender {
     public void stopConnection() {
         try {
             sendMessage("END", "");
-
             in.close();
             out.close();
             clientSocket.close();

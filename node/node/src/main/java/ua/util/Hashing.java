@@ -11,5 +11,4 @@ public class Hashing {
         long B = max + abs(min) + 1;
         return (int) (A * 32768 / B);
     }
-
 }
