@@ -9,12 +9,12 @@ public class NameserverApplication {
 
     public static void main(String[] args) {
 
+        // --- Start REST application --- /
+        SpringApplication.run(NameserverApplication.class, args);
+
         // --- Start multicast receiver --- //
         MulticastReceiver receiver = new MulticastReceiver();
         receiver.start();
-
-        // --- Start REST application --- /
-        SpringApplication.run(NameserverApplication.class, args);
     }
 
 }

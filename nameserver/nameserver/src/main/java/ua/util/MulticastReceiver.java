@@ -12,7 +12,7 @@ public class MulticastReceiver extends Thread {
     protected MulticastSocket socket = null;
     protected byte[] buffer = new byte[256];
 
-    public void run() {
+    public void start() {
         System.out.println("Multicast listener started");
 
         try {

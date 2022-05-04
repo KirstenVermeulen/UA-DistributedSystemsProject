@@ -11,4 +11,5 @@ public class GetNeighbors {
         this.previous_node = previous_node;
         this.next_node = next_node;
     }
+
 }

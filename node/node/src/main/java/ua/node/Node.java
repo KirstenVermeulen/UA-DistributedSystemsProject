@@ -5,7 +5,9 @@ import ua.HTTP.GetNeighbors;
 import ua.HTTP.JsonBodyHandler;
 import ua.util.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -33,7 +35,7 @@ public class Node {
     private HttpClient httpClient;
 
     // --- CONSTRUCTOR --- //
-    private Node() {
+    private Node() throws UnknownHostException {
         try {
             nodeName = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
@@ -52,7 +54,11 @@ public class Node {
 
     public static Node getInstance() {
         if (Node.instance == null) {
-            Node.instance = new Node();
+            try {
+                Node.instance = new Node();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
         }
 
         return Node.instance;
@@ -121,7 +127,7 @@ public class Node {
 
     public void failure(String failedNode) {
         // Remove Node from network
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver  + "/NameServer/ExitNetwork/" + failedNode))
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/ExitNetwork/" + failedNode))
                 .header("accept", "application/json")
                 .build();
         try {
@@ -131,7 +137,7 @@ public class Node {
         }
 
         // Get my new neighbors
-        request = HttpRequest.newBuilder(URI.create("http://" + nameserver  + "/NameServer/GetNeighbors"))
+        request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/GetNeighbors"))
                 .header("accept", "application/json")
                 .build();
 
@@ -148,8 +154,8 @@ public class Node {
             e.printStackTrace();
         }
 
-        // Notify my next neighbor
 
+        // Notify my next neighbor
         try {
             tcpSender.startConnection(nextNode, Constants.PORT);
             tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
@@ -157,6 +163,29 @@ public class Node {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+    }
 
+    public void shutdown() throws MalformedURLException {
+        // Remove itself from nameserver
+        URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null;) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("node removed from nameserver");
+        //update next node with value of prev node
+        tcpSender.startConnection(nextNode, Constants.PORT);
+        tcpSender.sendMessage("PREVIOUS", previousNode);
+        tcpSender.stopConnection();
+        System.out.println("nextnode updated with previousnode value");
+        //update previous node with value of next node
+        tcpSender.startConnection(previousNode, Constants.PORT);
+        tcpSender.sendMessage("NEXT", nextNode);
+        tcpSender.stopConnection();
+        System.out.println("previousnode updated with nextnode value");
     }
 }
