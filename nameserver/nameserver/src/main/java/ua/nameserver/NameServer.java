@@ -59,6 +59,17 @@ public class NameServer {
         return ip;
     }
 
+    public String getIpMapData() {
+        String json = "";
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            json = mapper.writeValueAsString(ipMap);
+        } catch (Exception e){
+            System.out.println("JSON error");
+        }
+        return json;
+    }
+
     public void addIp(String ip) {
         ipMap.put(hash(ip), ip);
     }

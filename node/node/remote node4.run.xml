@@ -2,7 +2,7 @@
   <configuration default="false" name="remote node4" type="Application" factoryName="Application" folderName="Remote">
     <option name="MAIN_CLASS_NAME" value="ua.node.Main" />
     <module name="node" />
-    <target name="root@dist-computing.idlab.uantwerpen.be:100842" />
+    <target name="root@dist-computing.idlab.uantwerpen.be:10084" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="ua.node.*" />

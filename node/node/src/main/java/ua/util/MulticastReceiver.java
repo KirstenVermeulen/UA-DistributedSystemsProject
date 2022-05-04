@@ -24,8 +24,9 @@ public class MulticastReceiver extends Thread {
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
-
-                String[] msg = new String(packet.getData(), packet.getOffset(), packet.getLength()).split(":");
+                String data = new String(packet.getData(), packet.getOffset(), packet.getLength());
+                System.out.println(data);
+                String[] msg = data.split(":");
 
                 if (msg[0].equals("END")) {
                     break;
