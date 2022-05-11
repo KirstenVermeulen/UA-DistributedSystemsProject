@@ -152,6 +152,10 @@ public class NameServer {
         }
     }
 
+    public void CheckIfReplicatedNode(String file) {
+        //soon
+    }
+
     public int getMapLength() {
         return ipMap.size();
     }
