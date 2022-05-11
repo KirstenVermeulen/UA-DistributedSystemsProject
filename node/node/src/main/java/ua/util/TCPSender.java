@@ -15,8 +15,7 @@ public class TCPSender {
 
     // --- CONSTRUCTOR --- //
 
-    public TCPSender()
-    {
+    public TCPSender() {
 
     }
 
@@ -36,6 +35,11 @@ public class TCPSender {
 
     public void sendMessage(String type, String content) {
         String msg = String.format("%s:%s", type, content);
+        out.println(msg);
+    }
+
+    public void sendFile(String receiverip, File content) {
+        String msg = String.format("%s:%s:%s", "FILETRANSFER", receiverip, Node.getInstance().getCurrentNode(), content);
         out.println(msg);
     }
 

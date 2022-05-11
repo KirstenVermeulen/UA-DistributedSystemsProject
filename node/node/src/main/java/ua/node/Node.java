@@ -68,6 +68,13 @@ public class Node {
 
     // --- SETTERS --- //
 
+    public String getCurrentNode() {
+        return currentNode;
+    }
+
+
+    // --- SETTERS --- //
+
     public void setPreviousNode(String previousNode) {
         this.previousNode = previousNode;
     }
@@ -209,8 +216,7 @@ public class Node {
                     for (File file : files.listFiles()) {
                         // share file
                         System.out.println(file.getAbsolutePath());
-
-
+                        ReplicateFile(file);
                     }
                 }
             }
@@ -222,11 +228,21 @@ public class Node {
 
     public void ReplicateFile(File file) {
         try {
-            URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/");
+            // ip voor file ophalen
+            URL url = new URL("http://" + nameserver + ":8080/NameServer/GetReplicationIP/"+file.getName());
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8")))
             for (String line; (line = reader.readLine()) != null; ) {
                 System.out.println(line);
             }
+            // extract ip from responds
+            String replicationIP = "";
+
+            FileInputStream fis = new FileInputStream(file);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+
+            tcpSender.startConnection(previousNode, Constants.PORT);
+            tcpSender.sendFile(replicationIP, );
+            tcpSender.stopConnection();
         } catch (Exception e) {
             e.printStackTrace();
         }
