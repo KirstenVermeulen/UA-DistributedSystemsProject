@@ -22,11 +22,9 @@ public class Node {
 
     private String previousNode;
     private String nextNode;
-    private String nameserver;
+    private String currentNode;
 
-    private int currentHash;
-    private int previousHash = -1;
-    private int nextHash = -1;
+    private String nameserver;
 
     private String nodeName;
 
@@ -35,15 +33,19 @@ public class Node {
     private HttpClient httpClient;
 
     // --- CONSTRUCTOR --- //
-    private Node() throws UnknownHostException {
+    private Node() {
         try {
+            currentNode = InetAddress.getLocalHost().getHostAddress();
             nodeName = InetAddress.getLocalHost().getHostName();
+
+            nextNode = currentNode;
+            previousNode = currentNode;
         } catch (UnknownHostException e) {
             nodeName = "BadNodeName";
             e.printStackTrace();
         }
 
-        currentHash = Hashing.hash(nodeName);
+
 
         publisher = new MulticastPublisher();
         tcpSender = new TCPSender();
@@ -54,11 +56,7 @@ public class Node {
 
     public static Node getInstance() {
         if (Node.instance == null) {
-            try {
-                Node.instance = new Node();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
+            Node.instance = new Node();
         }
 
         return Node.instance;
@@ -84,11 +82,15 @@ public class Node {
         publisher.publishName(nodeName);
     }
 
-    public void nodeJoined(String name, String ipAddress) {
-        int hash = Hashing.hash(name);
+    public void nodeJoined(String ipAddress) {
         ipAddress = ipAddress.replace("/", "");
-        if (nextHash < -1 || (hash < nextHash && hash > currentHash)) {
-            nextHash = hash;
+
+        int myHash = Hashing.hash(currentNode);
+        int nextHash = Hashing.hash(nextNode);
+        int previousHash = Hashing.hash(previousNode);
+        int newHash = Hashing.hash(ipAddress);
+
+        if (myHash == nextHash || (newHash < nextHash && newHash > myHash)) {
             nextNode = ipAddress;
 
             // Respond to the node
@@ -101,8 +103,7 @@ public class Node {
             }
         }
 
-        if (previousHash < -1 || (hash > previousHash && hash < currentHash)) {
-            previousHash = hash;
+        if (previousHash == myHash || (newHash > previousHash && newHash < myHash)) {
             previousNode = ipAddress;
 
             // Respond to the node
