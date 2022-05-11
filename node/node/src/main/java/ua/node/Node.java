@@ -121,7 +121,7 @@ public class Node {
         publisher.publishName(nodeName);
     }
 
-    public void nodeJoined(String ipAddress) {
+    public void nodeJoined(String ipAddress) throws MalformedURLException {
         ipAddress = ipAddress.replace("/", "");
 
         int amountOfNodesInNetwork = 1;
@@ -381,7 +381,7 @@ public class Node {
     public void ReplicateFile(File file) {
         try {
             URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8")))
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
             for (String line; (line = reader.readLine()) != null; ) {
                 System.out.println(line);
             }
