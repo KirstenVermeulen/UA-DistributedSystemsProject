@@ -31,7 +31,7 @@ public class MulticastReceiver extends Thread {
                 if (msg[0].equals("END")) {
                     break;
                 } else if (msg[0].equals("JOIN")) {
-                    Node.getInstance().nodeJoined(msg[1], String.valueOf(packet.getAddress()));
+                    Node.getInstance().nodeJoined(String.valueOf(packet.getAddress()));
                 } else {
                     System.out.println("Not a valid packet type");
                 }

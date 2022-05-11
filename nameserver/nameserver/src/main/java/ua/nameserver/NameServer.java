@@ -152,8 +152,12 @@ public class NameServer {
         }
     }
 
-    public void CheckIfReplicatedNode(String file) {
+    public void CheckIfReplicatedNode(String ip, int filehash) {
         //soon
+        int iphash = hash(ip);
+        if (iphash < filehash){
+
+        }
     }
 
     public int getMapLength() {
