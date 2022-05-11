@@ -167,7 +167,7 @@ public class Node {
 
     public void shutdown() throws MalformedURLException {
         // Remove itself from nameserver
-        URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/");
+        URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork");
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
             for (String line; (line = reader.readLine()) != null;) {

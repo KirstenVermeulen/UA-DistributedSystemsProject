@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="remote node1" type="Application" factoryName="Application" folderName="Remote">
+  <configuration default="false" name="Connect node 1" type="Application" factoryName="Application" folderName="Remote">
     <option name="MAIN_CLASS_NAME" value="ua.node.Main" />
     <module name="node" />
-    <target name="host1" />
+    <target name="Node1" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="ua.node.*" />

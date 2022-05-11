@@ -15,7 +15,9 @@ public class TCPSender {
 
     // --- CONSTRUCTOR --- //
 
-    public TCPSender() {
+    public TCPSender()
+    {
+
     }
 
 

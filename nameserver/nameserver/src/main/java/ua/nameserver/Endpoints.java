@@ -18,6 +18,13 @@ public class Endpoints {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    // Get's the file hash from
+    @PostMapping("/ReplicateHashFile")
+    ResponseEntity<String> replicateHashFile(@RequestBody String filehash){
+        namingServer.CheckIfReplicatedNode(filehash);
+        return new ResponseEntity<>("Successfully Received hash of file", HttpStatus.ACCEPTED);
+    }
+
     @GetMapping("/JoinNetwork")
 //    @ResponseStatus(code = HttpStatus.OK, reason = "OK")
     public ResponseEntity<String> joinNetwork(HttpServletRequest request) {
