@@ -87,7 +87,7 @@ public class Node {
     public void nodeJoined(String name, String ipAddress) {
         int hash = Hashing.hash(name);
         ipAddress = ipAddress.replace("/", "");
-        if (nextHash < 0 || (hash < nextHash && hash > currentHash)) {
+        if (nextHash < -1 || (hash < nextHash && hash > currentHash)) {
             nextHash = hash;
             nextNode = ipAddress;
 
@@ -101,7 +101,7 @@ public class Node {
             }
         }
 
-        if (previousHash < 0 || (hash > previousHash && hash < currentHash)) {
+        if (previousHash < -1 || (hash > previousHash && hash < currentHash)) {
             previousHash = hash;
             previousNode = ipAddress;
 
