@@ -89,6 +89,7 @@ public class Node {
         ipAddress = ipAddress.replace("/", "");
         if (nextHash < 0 || (hash < nextHash && hash > currentHash)) {
             nextHash = hash;
+            nextNode = ipAddress;
 
             // Respond to the node
             try {
@@ -102,6 +103,7 @@ public class Node {
 
         if (previousHash < 0 || (hash > previousHash && hash < currentHash)) {
             previousHash = hash;
+            previousNode = ipAddress;
 
             // Respond to the node
             try {
