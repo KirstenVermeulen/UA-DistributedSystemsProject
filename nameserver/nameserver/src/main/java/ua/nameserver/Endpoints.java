@@ -20,8 +20,9 @@ public class Endpoints {
 
     // Get's the file hash from
     @PostMapping("/ReplicateHashFile")
-    ResponseEntity<String> replicateHashFile(@RequestBody String filehash){
-        namingServer.CheckIfReplicatedNode(filehash);
+    ResponseEntity<String> replicateHashFile(@RequestBody int filehash , HttpServletRequest request){
+        String ip = request.getRemoteAddr();
+        namingServer.CheckIfReplicatedNode(ip,filehash);
         return new ResponseEntity<>("Successfully Received hash of file", HttpStatus.ACCEPTED);
     }
 
@@ -34,7 +35,7 @@ public class Endpoints {
         return new ResponseEntity<>("Successfully joined the network", HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/ExitNetwork/")
+    @GetMapping("/ExitNetwork")
     public ResponseEntity<String> exitNetworkByIP(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         if (namingServer.ipCheck(ip)) {
