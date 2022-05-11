@@ -64,6 +64,7 @@ public class Endpoints {
             return namingServer.getNeighbors(ip);
         }
     }
+
     @GetMapping("/GetIpMap")
     public String getIpMap() {
         return namingServer.getIpMapData();

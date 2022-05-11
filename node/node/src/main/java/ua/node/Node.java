@@ -6,12 +6,15 @@ import ua.HTTP.JsonBodyHandler;
 import ua.util.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 public class Node {
@@ -50,6 +53,7 @@ public class Node {
         httpClient = HttpClient.newHttpClient();
 
         discovery();
+        starting();
     }
 
     public static Node getInstance() {
@@ -114,7 +118,7 @@ public class Node {
         }
     }
 
-    public void checkIfAlone(int numberOfNodes){
+    public void checkIfAlone(int numberOfNodes) {
         if (numberOfNodes < 2) {
             try {
                 previousNode = InetAddress.getLocalHost().getHostAddress();
@@ -170,7 +174,7 @@ public class Node {
         URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/");
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
-            for (String line; (line = reader.readLine()) != null;) {
+            for (String line; (line = reader.readLine()) != null; ) {
                 System.out.println(line);
             }
         } catch (IOException e) {
@@ -187,5 +191,41 @@ public class Node {
         tcpSender.sendMessage("NEXT", nextNode);
         tcpSender.stopConnection();
         System.out.println("previousnode updated with nextnode value");
+    }
+
+    public void starting() {
+        String path = "/root/FilesToReplicate";
+        File files = new File(path);
+        try {
+            if (!files.exists()) {
+                // folder is empty so create folder
+                Files.createDirectories(Paths.get(path));
+            } else {
+                // loop through all files
+                if (files.listFiles() != null) {
+                    for (File file : files.listFiles()) {
+                        // share file
+                        System.out.println(file.getAbsolutePath());
+
+
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void ReplicateFile(File file) {
+        try {
+            URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8")))
+            for (String line; (line = reader.readLine()) != null; ) {
+                System.out.println(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
