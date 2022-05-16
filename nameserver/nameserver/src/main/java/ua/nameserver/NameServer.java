@@ -152,12 +152,21 @@ public class NameServer {
         }
     }
 
-    public void CheckIfReplicatedNode(String ip, int filehash) {
-        //soon
-        int iphash = hash(ip);
-        if (iphash < filehash){
+    public String CheckIfReplicatedNode(int filehash) {
+                        //[IPHASH:IP ADDR]
+        //private HashMap<Integer, String> ipMap = new HashMap<>();
+        ArrayList<Integer> tempreplicatednodeslist = new ArrayList<>();
+        // node.hash < file.hash
+        for (Integer nodehash : ipMap.keySet()) {
+            if (nodehash < filehash){
+                tempreplicatednodeslist.add(nodehash);
+            }
+        }
+        if (tempreplicatednodeslist.isEmpty()){
 
         }
+        int max = Collections.max(tempreplicatednodeslist);
+        return ipMap.get(max);
     }
 
     public int getMapLength() {
