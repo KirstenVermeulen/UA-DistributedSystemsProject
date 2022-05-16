@@ -73,6 +73,11 @@ public class Endpoints {
         }
     }
 
+    @GetMapping("/AmountOfNodes")
+    public Integer AmountOfNodes() {
+        return namingServer.getMapLength();
+
+    }
     @GetMapping("/GetIpMap")
     public String getIpMap() {
         return namingServer.getIpMapData();

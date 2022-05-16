@@ -39,7 +39,13 @@ public class TCPHandler implements Runnable {
                 } else if (msg[0].equals("NUMBEROFNODES")) {
                     Node.getInstance().setNameserver(clientSocket.getInetAddress().getHostAddress());
                     Node.getInstance().checkIfAlone(Integer.parseInt(msg[1]));
-                } else if (msg[0].equals("SHUTDOWN")) {
+                } else if (msg[0].equals("SETSMALLEST")) {
+                    Node.getInstance().setSmallesthash(true);
+                }
+                else if (msg[0].equals("SETBIGGEST")) {
+                    Node.getInstance().setBiggesthash(true);
+                }
+                else if (msg[0].equals("SHUTDOWN")) {
                     Node.getInstance().shutdown();
                 } else if (msg[0].equals("FILETRANSFER")) {
                     Node.getInstance().FileTransfer(msg);

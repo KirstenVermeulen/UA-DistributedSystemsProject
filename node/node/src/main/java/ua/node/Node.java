@@ -24,12 +24,14 @@ public class Node {
     private String previousNode;
     private String nextNode;
     private String currentNode;
-
     private String nameserver;
-
     private String nodeName;
 
+    boolean biggesthash = false;
+    boolean smallesthash = false;
+
     private MulticastPublisher publisher;
+
     private TCPSender tcpSender;
     private HttpClient httpClient;
 
@@ -53,7 +55,6 @@ public class Node {
         httpClient = HttpClient.newHttpClient();
 
         discovery();
-        starting();
     }
 
     public static Node getInstance() {
@@ -85,20 +86,168 @@ public class Node {
         this.nameserver = nameserver;
     }
 
+    public void setBiggesthash(boolean biggesthash) {
+        this.biggesthash = biggesthash;
+    }
+
+    public void setSmallesthash(boolean smallesthash) {
+        this.smallesthash = smallesthash;
+    }
+
+    // --- GETTERS --- //
+
+    public String getPreviousNode() {
+        return previousNode;
+    }
+
+    public String getNextNode() {
+        return nextNode;
+    }
+
+    public String getNameserver() {
+        return nameserver;
+    }
+
+    public TCPSender getTcpSender() {
+        return tcpSender;
+    }
+
+    public boolean isBiggesthash() {
+        return biggesthash;
+    }
+
+    public boolean isSmallesthash() {
+        return smallesthash;
+    }
+
     // --- METHODS --- //
 
     private void discovery() {
         publisher.publishName(nodeName);
     }
 
-    public void nodeJoined(String ipAddress) {
+    public void nodeJoined(String ipAddress) throws MalformedURLException {
         ipAddress = ipAddress.replace("/", "");
 
+        int amountOfNodesInNetwork = 1;
+     /*
         int myHash = Hashing.hash(currentNode);
         int nextHash = Hashing.hash(nextNode);
         int previousHash = Hashing.hash(previousNode);
+     */
+
+        int myHash = Hashing.hash(currentNode);
+        int nextHash = Hashing.hash(nextNode);;
+        int previousHash = Hashing.hash(previousNode);
         int newHash = Hashing.hash(ipAddress);
 
+        URL urlshutdown = new URL("http://" + nameserver + ":8080/NameServer/AmountOfNodes");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlshutdown.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null;) {
+                amountOfNodesInNetwork = Integer.parseInt(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("check if nameserver is running ;) ");
+        }
+
+        if (amountOfNodesInNetwork == 2) {
+                previousNode = ipAddress;
+                nextNode = ipAddress;
+                nextHash = Hashing.hash(nextNode);
+                previousHash = Hashing.hash(previousNode);
+            if (newHash < myHash) {
+                //todo send to other node it is the smallest now
+                sendTCP(ipAddress,"SETSMALLEST",null);
+                biggesthash = true;
+            } else {
+                smallesthash = true;
+                sendTCP(ipAddress,"SETBIGGEST",null);
+            }
+
+            sendTCP(ipAddress, "PREVIOUS", currentNode);
+            sendTCP(ipAddress, "NEXT", currentNode);
+        }
+/*
+        if (amountOfNodesInNetwork == 3) {
+            if (newHash < myHash) {
+                if (smallesthash) {
+                    //todo send to other node it is the smallest now
+                    smallesthash = false;
+                }
+                if (biggesthash & (previousHash > newHash)) {
+                    nextNode = ipAddress;
+                    nextHash = Hashing.hash(previousNode);
+                } else {
+                    previousNode = ipAddress;
+                    previousHash = Hashing.hash(previousNode);
+                }
+            }
+
+            if (newHash > myHash) {
+                if (biggesthash) {
+                    //todo update new node with biggesthash
+                    biggesthash = false;
+                } if (smallesthash & (nextHash < newHash)) {
+                    previousNode = ipAddress;
+                    previousHash = Hashing.hash(previousNode);
+                } else {
+                    nextNode = ipAddress;
+                    nextHash = Hashing.hash(nextNode);
+                }
+            }
+        }
+
+ */
+        if (amountOfNodesInNetwork >= 3) {
+            if (newHash < myHash) {
+                if (smallesthash) {
+                    //todo send to other node it is the smallest now
+                    sendTCP(ipAddress, "SETSMALLEST",null);
+                    sendTCP(ipAddress, "NEXT",currentNode);
+                    smallesthash = false;
+                    previousNode = ipAddress;
+                    previousHash = Hashing.hash(previousNode);
+                }
+                if (biggesthash & (nextHash > newHash)) {
+                    nextNode = ipAddress;
+                    nextHash = Hashing.hash(nextNode);
+                    sendTCP(ipAddress, "PREVIOUS",currentNode);
+                    //todo update new node with prevnode and nextnode
+                } else if (previousHash < newHash) {
+                    previousNode = ipAddress;
+                    previousHash = Hashing.hash(previousNode);
+                    sendTCP(ipAddress, "NEXT",currentNode);
+                }
+            }
+
+            if (newHash > myHash) {
+                if (biggesthash) {
+                    //todo update new node with biggesthash -> true && set own address as previousnode on newnode
+                    biggesthash = false;
+                    nextNode = ipAddress;
+                    nextHash = Hashing.hash(nextNode);
+                    sendTCP(ipAddress, "SETBIGGEST",null);
+                    sendTCP(ipAddress, "PREVIOUS",currentNode);
+                }
+                if (smallesthash & (previousHash < newHash)) {
+                    previousNode = ipAddress;
+                    previousHash = Hashing.hash(previousNode);
+                    //todo update new node with nextnode (and maybe biggesthash to true altho first if statement takes care of this)
+                    sendTCP(ipAddress, "NEXT",currentNode);
+
+                } else if (newHash < nextHash) {
+                    nextNode = ipAddress;
+                    nextHash = Hashing.hash(nextNode);
+                    sendTCP(ipAddress, "PREVIOUS",currentNode);
+                }
+
+            }
+        }
+
+
+/*
         if (myHash == nextHash || (newHash < nextHash && newHash > myHash)) {
             nextNode = ipAddress;
 
@@ -124,9 +273,18 @@ public class Node {
                 e.printStackTrace();
             }
         }
+
+ */
+
     }
 
-    public void checkIfAlone(int numberOfNodes) {
+    public void sendTCP (String ipAddressNewnode, String type, String ipAddresstogive) {
+            tcpSender.startConnection(ipAddressNewnode, Constants.PORT);
+            tcpSender.sendMessage(type, ipAddresstogive);
+            tcpSender.stopConnection();
+    }
+
+    public void checkIfAlone(int numberOfNodes){
         if (numberOfNodes < 2) {
             try {
                 previousNode = InetAddress.getLocalHost().getHostAddress();
@@ -179,10 +337,10 @@ public class Node {
 
     public void shutdown() throws MalformedURLException {
         // Remove itself from nameserver
-        URL url = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork");
+        URL urlshutdown = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork");
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
-            for (String line; (line = reader.readLine()) != null; ) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlshutdown.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null;) {
                 System.out.println(line);
             }
         } catch (IOException e) {
