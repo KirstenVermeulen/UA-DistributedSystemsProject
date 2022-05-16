@@ -152,7 +152,7 @@ public class NameServer {
         }
     }
 
-    public int CheckIfReplicatedNode(int filehash) {
+    public String CheckIfReplicatedNode(int filehash) {
                         //[IPHASH:IP ADDR]
         //private HashMap<Integer, String> ipMap = new HashMap<>();
         ArrayList<Integer> tempreplicatednodeslist = new ArrayList<>();
@@ -162,8 +162,11 @@ public class NameServer {
                 tempreplicatednodeslist.add(nodehash);
             }
         }
+        if (tempreplicatednodeslist.isEmpty()){
+
+        }
         int max = Collections.max(tempreplicatednodeslist);
-        return max;
+        return ipMap.get(max);
     }
 
     public int getMapLength() {
