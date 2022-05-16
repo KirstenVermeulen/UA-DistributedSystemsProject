@@ -38,7 +38,8 @@ public class TCPSender {
         out.println(msg);
     }
 
-    public void sendFile(String receiverip, File content) {
+    public void sendFile(String receiverip, String content) {
+        // type:receiverip:senderip:file
         String msg = String.format("%s:%s:%s", "FILETRANSFER", receiverip, Node.getInstance().getCurrentNode(), content);
         out.println(msg);
     }

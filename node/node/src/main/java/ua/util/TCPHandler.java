@@ -42,20 +42,7 @@ public class TCPHandler implements Runnable {
                 } else if (msg[0].equals("SHUTDOWN")) {
                     Node.getInstance().shutdown();
                 } else if (msg[0].equals("FILETRANSFER")) {
-                    // check if sender ip equals our own ip
-                    if (msg[2] == Node.getInstance().getCurrentNode()){
-                        // we got our own file back ...
-                    }
-                    else if (msg[1] == Node.getInstance().getCurrentNode()){
-                        // file was meant for this node
-                    }
-                    else{
-                        // transmit to next_node
-                        tcpSender.startConnection(ipAddress, Constants.PORT);
-                        tcpSender.sendFile(msg[2], msg[2]);
-                        tcpSender.stopConnection();
-
-                    }
+                    Node.getInstance().FileTransfer(msg);
                 }
 
                 else {

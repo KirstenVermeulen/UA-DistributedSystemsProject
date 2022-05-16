@@ -5,14 +5,12 @@ import ua.HTTP.GetNeighbors;
 import ua.HTTP.JsonBodyHandler;
 import ua.util.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
@@ -230,7 +228,7 @@ public class Node {
         try {
             // ip voor file ophalen
             URL url = new URL("http://" + nameserver + ":8080/NameServer/GetReplicationIP/"+file.getName());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8")))
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
             for (String line; (line = reader.readLine()) != null; ) {
                 System.out.println(line);
             }
@@ -245,6 +243,22 @@ public class Node {
             tcpSender.stopConnection();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void FileTransfer(String[] msg){
+        // check if sender ip equals our own ip
+        if (msg[2].equals(Node.getInstance().getCurrentNode())){
+            // we got our own file back -> something went wrong
+        }
+        else if (msg[1].equals(Node.getInstance().getCurrentNode())){
+            // file was meant for this node -> write to disc
+        }
+        else{
+            // file was meant for this node -> transmit to next_node
+            tcpSender.startConnection(nextNode, Constants.PORT);
+            tcpSender.sendFile(msg[2], msg[3]);
+            tcpSender.stopConnection();
         }
     }
 }
