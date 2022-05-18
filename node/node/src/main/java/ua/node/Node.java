@@ -1,5 +1,8 @@
 package ua.node;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import ua.HTTP.ExitNetwork;
 import ua.HTTP.GetNeighbors;
 import ua.HTTP.JsonBodyHandler;
@@ -13,6 +16,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class Node {
@@ -47,6 +52,7 @@ public class Node {
             nodeName = "BadNodeName";
             e.printStackTrace();
         }
+
 
 
         publisher = new MulticastPublisher();
@@ -136,15 +142,14 @@ public class Node {
      */
 
         int myHash = Hashing.hash(currentNode);
-        int nextHash = Hashing.hash(nextNode);
-        ;
+        int nextHash = Hashing.hash(nextNode);;
         int previousHash = Hashing.hash(previousNode);
         int newHash = Hashing.hash(ipAddress);
 
         URL urlshutdown = new URL("http://" + nameserver + ":8080/NameServer/AmountOfNodes");
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlshutdown.openStream(), "UTF-8"))) {
-            for (String line; (line = reader.readLine()) != null; ) {
+            for (String line; (line = reader.readLine()) != null;) {
                 amountOfNodesInNetwork = Integer.parseInt(line);
             }
         } catch (IOException e) {
@@ -153,17 +158,17 @@ public class Node {
         }
 
         if (amountOfNodesInNetwork == 2) {
-            previousNode = ipAddress;
-            nextNode = ipAddress;
-            nextHash = Hashing.hash(nextNode);
-            previousHash = Hashing.hash(previousNode);
+                previousNode = ipAddress;
+                nextNode = ipAddress;
+                nextHash = Hashing.hash(nextNode);
+                previousHash = Hashing.hash(previousNode);
             if (newHash < myHash) {
                 //todo send to other node it is the smallest now
-                sendTCP(ipAddress, "SETSMALLEST", null);
+                sendTCP(ipAddress,"SETSMALLEST",null);
                 biggesthash = true;
             } else {
                 smallesthash = true;
-                sendTCP(ipAddress, "SETBIGGEST", null);
+                sendTCP(ipAddress,"SETBIGGEST",null);
             }
 
             sendTCP(ipAddress, "PREVIOUS", currentNode);
@@ -204,8 +209,8 @@ public class Node {
             if (newHash < myHash) {
                 if (smallesthash) {
                     //todo send to other node it is the smallest now
-                    sendTCP(ipAddress, "SETSMALLEST", null);
-                    sendTCP(ipAddress, "NEXT", currentNode);
+                    sendTCP(ipAddress, "SETSMALLEST",null);
+                    sendTCP(ipAddress, "NEXT",currentNode);
                     smallesthash = false;
                     previousNode = ipAddress;
                     previousHash = Hashing.hash(previousNode);
@@ -213,12 +218,12 @@ public class Node {
                 if (biggesthash & (nextHash > newHash)) {
                     nextNode = ipAddress;
                     nextHash = Hashing.hash(nextNode);
-                    sendTCP(ipAddress, "PREVIOUS", currentNode);
+                    sendTCP(ipAddress, "PREVIOUS",currentNode);
                     //todo update new node with prevnode and nextnode
                 } else if (previousHash < newHash) {
                     previousNode = ipAddress;
                     previousHash = Hashing.hash(previousNode);
-                    sendTCP(ipAddress, "NEXT", currentNode);
+                    sendTCP(ipAddress, "NEXT",currentNode);
                 }
             }
 
@@ -228,19 +233,19 @@ public class Node {
                     biggesthash = false;
                     nextNode = ipAddress;
                     nextHash = Hashing.hash(nextNode);
-                    sendTCP(ipAddress, "SETBIGGEST", null);
-                    sendTCP(ipAddress, "PREVIOUS", currentNode);
+                    sendTCP(ipAddress, "SETBIGGEST",null);
+                    sendTCP(ipAddress, "PREVIOUS",currentNode);
                 }
                 if (smallesthash & (previousHash < newHash)) {
                     previousNode = ipAddress;
                     previousHash = Hashing.hash(previousNode);
                     //todo update new node with nextnode (and maybe biggesthash to true altho first if statement takes care of this)
-                    sendTCP(ipAddress, "NEXT", currentNode);
+                    sendTCP(ipAddress, "NEXT",currentNode);
 
                 } else if (newHash < nextHash) {
                     nextNode = ipAddress;
                     nextHash = Hashing.hash(nextNode);
-                    sendTCP(ipAddress, "PREVIOUS", currentNode);
+                    sendTCP(ipAddress, "PREVIOUS",currentNode);
                 }
 
             }
@@ -278,13 +283,13 @@ public class Node {
 
     }
 
-    public void sendTCP(String ipAddressNewnode, String type, String ipAddresstogive) {
-        tcpSender.startConnection(ipAddressNewnode, Constants.PORT);
-        tcpSender.sendMessage(type, ipAddresstogive);
-        tcpSender.stopConnection();
+    public void sendTCP (String ipAddressNewnode, String type, String ipAddresstogive) {
+            tcpSender.startConnection(ipAddressNewnode, Constants.PORT);
+            tcpSender.sendMessage(type, ipAddresstogive);
+            tcpSender.stopConnection();
     }
 
-    public void checkIfAlone(int numberOfNodes) {
+    public void checkIfAlone(int numberOfNodes){
         if (numberOfNodes < 2) {
             try {
                 previousNode = InetAddress.getLocalHost().getHostAddress();
@@ -295,35 +300,35 @@ public class Node {
         }
     }
 
-    public void failure(String failedNode) {
+    public void failure(String failedNode) throws MalformedURLException, JSONException {
         // Remove Node from network
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/ExitNetwork/" + failedNode))
-                .header("accept", "application/json")
-                .build();
-        try {
-            HttpResponse<Supplier<ExitNetwork>> response = httpClient.send(request, new JsonBodyHandler<>(ExitNetwork.class));
-        } catch (IOException | InterruptedException e) {
+        // Remove itself from nameserver
+        URL urlfailuredown = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/" + failedNode);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlfailuredown.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null;) {
+                System.out.println("failuremethod: " + line);
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+
 
         // Get my new neighbors
-        request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/GetNeighbors"))
-                .header("accept", "application/json")
-                .build();
+        URL getneighbours = new URL("http://" + nameserver + ":8080/NameServer/GetNeighbors/");
 
-        try {
-            HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getneighbours.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null;) {
+                JSONObject jsonprevnextnode = new JSONObject(line);
+                String prevnighbour = jsonprevnextnode.getString("previous_node");
+                String nxtnode = jsonprevnextnode.getString("next_node");
 
-            System.out.println(response.body().get().next_node);
-            System.out.println(response.body().get().previous_node);
 
-            this.previousNode = response.body().get().previous_node;
-            this.nextNode = response.body().get().next_node;
-
-        } catch (IOException | InterruptedException e) {
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         // Notify my next neighbor
         try {
@@ -340,7 +345,7 @@ public class Node {
         URL urlshutdown = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork");
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlshutdown.openStream(), "UTF-8"))) {
-            for (String line; (line = reader.readLine()) != null; ) {
+            for (String line; (line = reader.readLine()) != null;) {
                 System.out.println(line);
             }
         } catch (IOException e) {
@@ -385,8 +390,7 @@ public class Node {
     public void ReplicateFile(File file) {
         try {
             // ip voor file ophalen
-            int nameHash = Hashing.hash(file.getName());
-            URL url = new URL("http://" + nameserver + ":8080/NameServer/GetReplicationIP/" + nameHash);
+            URL url = new URL("http://" + nameserver + ":8080/NameServer/GetReplicationIP/"+file.getName());
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
             for (String line; (line = reader.readLine()) != null; ) {
                 System.out.println(line);
@@ -394,37 +398,30 @@ public class Node {
             // extract ip from responds
             String replicationIP = "";
 
+            FileInputStream fis = new FileInputStream(file);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+
             tcpSender.startConnection(previousNode, Constants.PORT);
-            tcpSender.sendFile(replicationIP, file.getName());
-            tcpSender.sendFileData(file);
+            tcpSender.sendFile(replicationIP,"" ); // content "" om errors te vermijden bij fresh pull
             tcpSender.stopConnection();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void FileTransfer(String[] msg) {
-        File file = new File("/root/tempTransferFiles/" + msg[3]);
+    public void FileTransfer(String[] msg){
         // check if sender ip equals our own ip
-        if (msg[2].equals(Node.getInstance().getCurrentNode())) {
-            // we got our own file back -> something went wrong, try again
-            ReplicateFile(file);
-            file.delete();
-        } else if (msg[1].equals(Node.getInstance().getCurrentNode())) {
-            // file was meant for this node -> write to disc -> move from temp folder to replicated folder
-            try {
-                Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/FilesToReplicate/" + msg[3]));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            // file was not meant for this node -> transmit to next_node
+        if (msg[2].equals(Node.getInstance().getCurrentNode())){
+            // we got our own file back -> something went wrong
+        }
+        else if (msg[1].equals(Node.getInstance().getCurrentNode())){
+            // file was meant for this node -> write to disc
+        }
+        else{
+            // file was meant for this node -> transmit to next_node
             tcpSender.startConnection(nextNode, Constants.PORT);
             tcpSender.sendFile(msg[2], msg[3]);
-            tcpSender.sendFileData(file);
             tcpSender.stopConnection();
-            // remove temp from folder
-            file.delete();
         }
     }
 }
