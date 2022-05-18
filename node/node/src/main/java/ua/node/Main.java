@@ -1,6 +1,7 @@
 package ua.node;
 
 import ua.util.MulticastReceiver;
+import ua.util.PingFailure;
 import ua.util.TCPReceiver;
 
 public class Main {
@@ -14,5 +15,8 @@ public class Main {
         // --- Multicast listener thread --- //
         MulticastReceiver receiver = new MulticastReceiver();
         receiver.start();
+
+        PingFailure pingFailure = new PingFailure();
+        pingFailure.start();
     }
 }

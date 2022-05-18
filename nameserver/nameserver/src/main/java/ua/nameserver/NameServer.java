@@ -162,11 +162,29 @@ public class NameServer {
                 tempreplicatednodeslist.add(nodehash);
             }
         }
-        if (tempreplicatednodeslist.isEmpty()){
+        if (tempreplicatednodeslist.isEmpty())
+        {
+            Map.Entry<Integer, String> entryWithMaxKey = null;
+            for (Map.Entry<Integer, String> currentEntry : ipMap.entrySet()) {
 
+                if (
+                    // If this is the first entry,
+                    // set the result as this
+                        entryWithMaxKey == null
+                                // If this entry's key is more than the max key
+                                // Set this entry as the max
+                                || currentEntry.getKey()
+                                .compareTo(entryWithMaxKey.getKey())
+                                > 0) {
+                    entryWithMaxKey = currentEntry;
+                }
+            }
+            return entryWithMaxKey.getValue();
         }
-        int max = Collections.max(tempreplicatednodeslist);
-        return ipMap.get(max);
+        else{
+            int max = Collections.max(tempreplicatednodeslist);
+            return ipMap.get(max);
+        }
     }
 
     public int getMapLength() {
