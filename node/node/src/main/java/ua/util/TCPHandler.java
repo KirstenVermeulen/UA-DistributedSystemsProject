@@ -41,8 +41,6 @@ public class TCPHandler implements Runnable {
                     Node.getInstance().checkIfAlone(Integer.parseInt(msg[1]));
                 } else if (msg[0].equals("SETSMALLEST")) {
                     Node.getInstance().setSmallesthash(true);
-                } else if (msg[0].equals("PING")) {
-                    //so it does not throw error
                 } else if (msg[0].equals("SETBIGGEST")) {
                     Node.getInstance().setBiggesthash(true);
                 } else if (msg[0].equals("SHUTDOWN")) {
