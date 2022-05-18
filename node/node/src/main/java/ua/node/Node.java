@@ -398,11 +398,13 @@ public class Node {
                 System.out.println(line);
                 replicationIP += line;
             }
-
-            tcpSender.startConnection(previousNode, Constants.PORT);
-            tcpSender.sendFile(replicationIP, file.getName());
-            tcpSender.sendFileData(file);
-            tcpSender.stopConnection();
+            // don't send file to ourselves
+            if (!replicationIP.equals(currentNode)){
+                tcpSender.startConnection(previousNode, Constants.PORT);
+                tcpSender.sendFile(replicationIP, file.getName());
+                tcpSender.sendFileData(file);
+                tcpSender.stopConnection();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
