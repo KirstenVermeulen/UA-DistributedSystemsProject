@@ -11,6 +11,8 @@ public class Main {
         server.start();
 
         Node.getInstance();
+        Node.getInstance().discovery();
+        Node.getInstance().starting();
 
         // --- Multicast listener thread --- //
         MulticastReceiver receiver = new MulticastReceiver();

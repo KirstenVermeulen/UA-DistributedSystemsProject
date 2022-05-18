@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class Node {
@@ -24,7 +25,7 @@ public class Node {
     private String previousNode;
     private String nextNode;
     private String currentNode;
-    private String nameserver;
+    private volatile String nameserver;
     private String nodeName;
 
     boolean biggesthash = false;
@@ -52,9 +53,6 @@ public class Node {
         publisher = new MulticastPublisher();
         tcpSender = new TCPSender();
         httpClient = HttpClient.newHttpClient();
-
-        discovery();
-        starting();
     }
 
     public static Node getInstance() {
@@ -122,7 +120,7 @@ public class Node {
 
     // --- METHODS --- //
 
-    private void discovery() {
+    public void discovery() {
         publisher.publishName(nodeName);
     }
 
@@ -370,7 +368,7 @@ public class Node {
             } else {
                 // loop through all files
                 if (files.listFiles() != null) {
-                    for (File file : files.listFiles()) {
+                    for (File file : Objects.requireNonNull(files.listFiles())) {
                         // share file
                         System.out.println(file.getAbsolutePath());
                         ReplicateFile(file);
@@ -393,11 +391,14 @@ public class Node {
 //                System.out.println(line);
 //                replicationIP += line;
 //            }
-
+            while (nameserver == null) {
+                Thread.onSpinWait();
+            }
             // extract ip from responds
             String replicationIP = "";
-
-            URL url = new URL("http://" + nameserver + ":8080/NameServera/ReplicateHashFile/" + nameHash);
+            String getrequest = "http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash;
+            System.out.println(getrequest);
+            URL url = new URL(getrequest);
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
                 for (String line; (line = reader.readLine()) != null; ) {
                     System.out.println(line);
