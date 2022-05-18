@@ -19,7 +19,7 @@ public class Endpoints {
     }
 
     // Returns the hashed ip (int) of owner of the file
-    @GetMapping("/ReplicateHashFile{hash}")
+    @GetMapping("/ReplicateHashFile/{hash}")
     public String replicateHashFile(@PathVariable("hash") int filehash){
         return namingServer.CheckIfReplicatedNode(filehash);
     }

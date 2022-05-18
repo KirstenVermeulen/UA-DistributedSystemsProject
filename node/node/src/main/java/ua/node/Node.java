@@ -54,6 +54,7 @@ public class Node {
         httpClient = HttpClient.newHttpClient();
 
         discovery();
+        starting();
     }
 
     public static Node getInstance() {
@@ -386,18 +387,33 @@ public class Node {
         try {
             // ip voor file ophalen
             int nameHash = Hashing.hash(file.getName());
-            URL url = new URL("http://" + nameserver + ":8080/NameServer/GetReplicationIP/" + nameHash);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
-            for (String line; (line = reader.readLine()) != null; ) {
-                System.out.println(line);
-            }
+//            URL url = new URL("http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash);
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+//            for (String line; (line = reader.readLine()) != null; ) {
+//                System.out.println(line);
+//                replicationIP += line;
+//            }
+
             // extract ip from responds
             String replicationIP = "";
+
+            URL url = new URL("http://" + nameserver + ":8080/NameServera/ReplicateHashFile/" + nameHash);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
+                for (String line; (line = reader.readLine()) != null; ) {
+                    System.out.println(line);
+                    replicationIP += line;
+                }
 
             tcpSender.startConnection(previousNode, Constants.PORT);
             tcpSender.sendFile(replicationIP, file.getName());
             tcpSender.sendFileData(file);
             tcpSender.stopConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -409,7 +425,7 @@ public class Node {
         if (msg[2].equals(Node.getInstance().getCurrentNode())) {
             // we got our own file back -> something went wrong, try again
             ReplicateFile(file);
-            file.delete();
+            file.delete(); // remove  from temp folder
         } else if (msg[1].equals(Node.getInstance().getCurrentNode())) {
             // file was meant for this node -> write to disc -> move from temp folder to replicated folder
             try {
@@ -423,8 +439,8 @@ public class Node {
             tcpSender.sendFile(msg[2], msg[3]);
             tcpSender.sendFileData(file);
             tcpSender.stopConnection();
-            // remove temp from folder
-            file.delete();
+
+            file.delete(); // remove  from temp folder
         }
     }
 }
