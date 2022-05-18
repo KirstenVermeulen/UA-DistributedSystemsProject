@@ -16,5 +16,4 @@ public class NameserverApplication {
         MulticastReceiver receiver = new MulticastReceiver();
         receiver.start();
     }
-
 }

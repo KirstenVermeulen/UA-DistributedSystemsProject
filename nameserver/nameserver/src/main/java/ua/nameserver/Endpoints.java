@@ -20,8 +20,8 @@ public class Endpoints {
 
     // Returns the hashed ip (int) of owner of the file
     @GetMapping("/ReplicateHashFile/{hash}")
-    public String replicateHashFile(@PathVariable("hash") int filehash){
-        System.out.println("Checking replication ip of file: "+filehash);
+    public String replicateHashFile(@PathVariable("hash") int filehash) {
+        System.out.println("Checking replication ip of file: " + filehash);
         return namingServer.CheckIfReplicatedNode(filehash);
     }
 
@@ -65,7 +65,7 @@ public class Endpoints {
     @GetMapping("/GetNeighbors")
     public String getNeighbors(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
-        System.out.println("Getting neighbors for: "+ip);
+        System.out.println("Getting neighbors for: " + ip);
         if (namingServer.getMapLength() < 1) {
             return "Not enough nodes in network, wait\n";
         } else {
@@ -77,8 +77,8 @@ public class Endpoints {
     public Integer AmountOfNodes() {
         System.out.println("Getting the amount of nodes");
         return namingServer.getMapLength();
-
     }
+
     @GetMapping("/GetIpMap")
     public String getIpMap() {
         System.out.println("Getting the ipmap");

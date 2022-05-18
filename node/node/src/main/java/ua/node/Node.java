@@ -122,6 +122,11 @@ public class Node {
 
     public void discovery() {
         publisher.publishName(nodeName);
+        // wait for nameserver ip before continuing
+        while (nameserver == null) {
+            Thread.onSpinWait();
+        }
+
     }
 
     public void nodeJoined(String ipAddress) throws MalformedURLException {
@@ -385,13 +390,12 @@ public class Node {
         try {
             // ip voor file ophalen
             int nameHash = Hashing.hash(file.getName());
-            while (nameserver == null) {
-                Thread.onSpinWait();
-            }
+            if (currentNode == nextNode) return; //extra check to avoid loops
+
             // extract ip from responds
             String replicationIP = "";
             String getrequest = "http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash;
-            System.out.println(getrequest);
+            System.out.println("Sending request: "+getrequest);
             URL url = new URL(getrequest);
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
             for (String line; (line = reader.readLine()) != null; ) {
@@ -399,8 +403,8 @@ public class Node {
                 replicationIP += line;
             }
             // don't send file to ourselves
-            if (!replicationIP.equals(currentNode)){
-                tcpSender.startConnection(previousNode, Constants.PORT);
+            if (!replicationIP.equals(currentNode)) {
+                tcpSender.startConnection(nextNode, Constants.PORT);
                 tcpSender.sendFile(replicationIP, file.getName());
                 tcpSender.sendFileData(file);
                 tcpSender.stopConnection();
@@ -420,7 +424,15 @@ public class Node {
         } else if (msg[1].equals(Node.getInstance().getCurrentNode())) {
             // file was meant for this node -> write to disc -> move from temp folder to replicated folder
             try {
-                Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/FilesToReplicate/" + msg[3]));
+                // Check if ReplicateFiles dir exists
+                String path = "/root/ReplicateFiles/";
+                File dir = new File(path);
+                if (!dir.exists()) {
+                    Files.createDirectories(Paths.get(path));
+                }
+                System.out.println("Done replicating file: "+file.getName());
+                Files.move(Paths.get(file.getAbsolutePath()), Paths.get(path + msg[3]));
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
