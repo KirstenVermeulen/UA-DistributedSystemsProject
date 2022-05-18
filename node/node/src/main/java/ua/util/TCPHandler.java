@@ -45,6 +45,7 @@ public class TCPHandler implements Runnable {
                 else if (msg[0].equals("SETBIGGEST")) {
                     Node.getInstance().setBiggesthash(true);
                 }
+
                 else if (msg[0].equals("SHUTDOWN")) {
                     Node.getInstance().shutdown();
                 }

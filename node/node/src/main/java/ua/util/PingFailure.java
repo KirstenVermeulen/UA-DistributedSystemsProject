@@ -18,11 +18,21 @@ public class PingFailure extends Thread {
 
                 if (previousNode != null) {
                     InetAddress addressprev = InetAddress.getByName(previousNode);
-                    boolean prevreachable = addressprev.isReachable(10000);
-                    System.out.println("prevreachable " + prevreachable);
-                    System.out.println("addressprev " + addressprev);
+                    InetAddress addressfalse = InetAddress.getByName("192.168.160.7");
 
-                  //  if (!prevreachable) Node.getInstance().failure(previousNode);
+                    boolean prevreachable = addressprev.isReachable(10000);
+                    boolean addddreachable = addressfalse.isReachable(10000);
+                    System.out.println("saysfalse " + addddreachable);
+                    System.out.println("addressprev " + addressprev);
+                    System.out.println("prevreachable " + prevreachable);
+                    try {
+                        Node.getInstance().sendTCP("192.168.160.7", "PING", null);
+                    } catch (Exception e) {
+                        System.out.println("wow deze node bestaat niet xddd");
+                        e.printStackTrace();
+                    }
+
+                    //  if (!prevreachable) Node.getInstance().failure(previousNode);
                 }
                 if (nextNode != null) {
                     InetAddress addressnext = InetAddress.getByName(nextNode);
