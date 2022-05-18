@@ -7,7 +7,8 @@ public class DetectNewFilesThread extends Thread {
         System.out.println("thread is running...");
         Node nodereference = Node.getInstance();
         while (true){
-            nodereference.starting();
+            // Every x time check if there is a new file added
+            //nodereference.starting();
         }
     }
 }
