@@ -1,20 +1,27 @@
 package ua.node;
 
-import ua.HTTP.ExitNetwork;
-import ua.HTTP.GetNeighbors;
-import ua.HTTP.JsonBodyHandler;
-import ua.util.*;
 
-import java.io.*;
-import java.net.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ua.util.Constants;
+import ua.util.Hashing;
+import ua.util.MulticastPublisher;
+import ua.util.TCPSender;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public class Node {
 
@@ -294,32 +301,60 @@ public class Node {
         }
     }
 
-    public void failure(String failedNode) {
+    public void failure(String failedNode) throws MalformedURLException {
         // Remove Node from network
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/ExitNetwork/" + failedNode))
-                .header("accept", "application/json")
-                .build();
-        try {
-            HttpResponse<Supplier<ExitNetwork>> response = httpClient.send(request, new JsonBodyHandler<>(ExitNetwork.class));
-        } catch (IOException | InterruptedException e) {
+        // Remove itself from nameserver
+        URL urlfailuredown = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/" + failedNode);
+        System.out.println("####################### we got into failure bois ############################");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlfailuredown.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null;) {
+                System.out.println("failuremethod: " + line);
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         // Get my new neighbors
-        request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/GetNeighbors"))
-                .header("accept", "application/json")
-                .build();
+        URL getneighbours = new URL("http://" + nameserver + ":8080/NameServer/GetNeighbors/");
 
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getneighbours.openStream(), "UTF-8"))) {
+            for (String json; (json = reader.readLine()) != null;) {
+                ObjectMapper mapper = new ObjectMapper();
+                HashMap<String, String> jsondata = new HashMap<>();
+                try {
+                    if (json != null) {
+                        jsondata = mapper.readValue(json, new TypeReference<>() {
+                        });
+                    } else {
+                        jsondata = new HashMap<>();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String nxtnode = jsondata.get("next_node");
+                String prevnighbour = jsondata.get("previous_node");
+
+                System.out.println("failure nextnode: " + nxtnode);
+                System.out.println("failure prevnode: " + prevnighbour);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Update value of my next node with my value as previous
         try {
-            HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
-
-            System.out.println(response.body().get().next_node);
-            System.out.println(response.body().get().previous_node);
-
-            this.previousNode = response.body().get().previous_node;
-            this.nextNode = response.body().get().next_node;
-
-        } catch (IOException | InterruptedException e) {
+            tcpSender.startConnection(nextNode, Constants.PORT);
+            tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
+            tcpSender.stopConnection();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        // update value of previous node with my value as next
+        try {
+            tcpSender.startConnection(previousNode, Constants.PORT);
+            tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
+            tcpSender.stopConnection();
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
 
