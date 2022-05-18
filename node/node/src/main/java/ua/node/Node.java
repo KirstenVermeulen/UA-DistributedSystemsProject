@@ -1,27 +1,22 @@
 package ua.node;
 
+import ua.HTTP.ExitNetwork;
+import ua.HTTP.GetNeighbors;
+import ua.HTTP.JsonBodyHandler;
+import ua.util.*;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import ua.util.Constants;
-import ua.util.Hashing;
-import ua.util.MulticastPublisher;
-import ua.util.TCPSender;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class Node {
 
@@ -34,6 +29,7 @@ public class Node {
     private String currentNode;
     private volatile String nameserver;
     private String nodeName;
+    private ArrayList startfilenames;
 
     boolean biggesthash = false;
     boolean smallesthash = false;
@@ -51,6 +47,7 @@ public class Node {
 
             nextNode = currentNode;
             previousNode = currentNode;
+            startfilenames = new ArrayList<>();
         } catch (UnknownHostException e) {
             nodeName = "BadNodeName";
             e.printStackTrace();
@@ -105,6 +102,14 @@ public class Node {
         return previousNode;
     }
 
+    public ArrayList<String> getStartFiles(){
+        if (startfilenames!=null){
+            return startfilenames;
+        }
+        else{
+            return null;
+        }
+    }
     public String getNextNode() {
         return nextNode;
     }
@@ -129,11 +134,6 @@ public class Node {
 
     public void discovery() {
         publisher.publishName(nodeName);
-        // wait for nameserver ip before continuing
-        while (nameserver == null) {
-            Thread.onSpinWait();
-        }
-
     }
 
     public void nodeJoined(String ipAddress) throws MalformedURLException {
@@ -306,60 +306,32 @@ public class Node {
         }
     }
 
-    public void failure(String failedNode) throws MalformedURLException {
+    public void failure(String failedNode) {
         // Remove Node from network
-        // Remove itself from nameserver
-        URL urlfailuredown = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/" + failedNode);
-        System.out.println("####################### we got into failure bois ############################");
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlfailuredown.openStream(), "UTF-8"))) {
-            for (String line; (line = reader.readLine()) != null;) {
-                System.out.println("failuremethod: " + line);
-            }
-        } catch (IOException e) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/ExitNetwork/" + failedNode))
+                .header("accept", "application/json")
+                .build();
+        try {
+            HttpResponse<Supplier<ExitNetwork>> response = httpClient.send(request, new JsonBodyHandler<>(ExitNetwork.class));
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
         // Get my new neighbors
-        URL getneighbours = new URL("http://" + nameserver + ":8080/NameServer/GetNeighbors/");
+        request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/GetNeighbors"))
+                .header("accept", "application/json")
+                .build();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getneighbours.openStream(), "UTF-8"))) {
-            for (String json; (json = reader.readLine()) != null;) {
-                ObjectMapper mapper = new ObjectMapper();
-                HashMap<String, String> jsondata = new HashMap<>();
-                try {
-                    if (json != null) {
-                        jsondata = mapper.readValue(json, new TypeReference<>() {
-                        });
-                    } else {
-                        jsondata = new HashMap<>();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                String nxtnode = jsondata.get("next_node");
-                String prevnighbour = jsondata.get("previous_node");
-
-                System.out.println("failure nextnode: " + nxtnode);
-                System.out.println("failure prevnode: " + prevnighbour);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Update value of my next node with my value as previous
         try {
-            tcpSender.startConnection(nextNode, Constants.PORT);
-            tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
-            tcpSender.stopConnection();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        // update value of previous node with my value as next
-        try {
-            tcpSender.startConnection(previousNode, Constants.PORT);
-            tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
-            tcpSender.stopConnection();
-        } catch (UnknownHostException e) {
+            HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
+
+            System.out.println(response.body().get().next_node);
+            System.out.println(response.body().get().previous_node);
+
+            this.previousNode = response.body().get().previous_node;
+            this.nextNode = response.body().get().next_node;
+
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -399,12 +371,12 @@ public class Node {
     }
 
     public void starting() {
-        String path = "/root/FilesToReplicate";
-        File files = new File(path);
+
+        File files = new File(Constants.path);
         try {
             if (!files.exists()) {
                 // folder is empty so create folder
-                Files.createDirectories(Paths.get(path));
+                Files.createDirectories(Paths.get(Constants.path));
             } else {
                 // loop through all files
                 if (files.listFiles() != null) {
@@ -425,12 +397,13 @@ public class Node {
         try {
             // ip voor file ophalen
             int nameHash = Hashing.hash(file.getName());
-            if (currentNode == nextNode) return; //extra check to avoid loops
-
+            while (nameserver == null) {
+                Thread.onSpinWait();
+            }
             // extract ip from responds
             String replicationIP = "";
             String getrequest = "http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash;
-            System.out.println("Sending request: "+getrequest);
+            System.out.println(getrequest);
             URL url = new URL(getrequest);
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
             for (String line; (line = reader.readLine()) != null; ) {
@@ -438,11 +411,12 @@ public class Node {
                 replicationIP += line;
             }
             // don't send file to ourselves
-            if (!replicationIP.equals(currentNode)) {
-                tcpSender.startConnection(nextNode, Constants.PORT);
+            if (!replicationIP.equals(currentNode)){
+                tcpSender.startConnection(previousNode, Constants.PORT);
                 tcpSender.sendFile(replicationIP, file.getName());
                 tcpSender.sendFileData(file);
                 tcpSender.stopConnection();
+                startfilenames.add(file.getName());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -459,15 +433,7 @@ public class Node {
         } else if (msg[1].equals(Node.getInstance().getCurrentNode())) {
             // file was meant for this node -> write to disc -> move from temp folder to replicated folder
             try {
-                // Check if ReplicateFiles dir exists
-                String path = "/root/ReplicateFiles/";
-                File dir = new File(path);
-                if (!dir.exists()) {
-                    Files.createDirectories(Paths.get(path));
-                }
-                System.out.println("Done replicating file: "+file.getName());
-                Files.move(Paths.get(file.getAbsolutePath()), Paths.get(path + msg[3]));
-
+                Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/FilesToReplicate/" + msg[3]));
             } catch (IOException e) {
                 e.printStackTrace();
             }
