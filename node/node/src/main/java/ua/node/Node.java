@@ -304,7 +304,7 @@ public class Node {
         // Remove Node from network
         // Remove itself from nameserver
         URL urlfailuredown = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/" + failedNode);
-
+        System.out.println("####################### we got into failure bois ############################");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlfailuredown.openStream(), "UTF-8"))) {
             for (String line; (line = reader.readLine()) != null;) {
                 System.out.println("failuremethod: " + line);
@@ -312,8 +312,6 @@ public class Node {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
 
         // Get my new neighbors
         URL getneighbours = new URL("http://" + nameserver + ":8080/NameServer/GetNeighbors/");
@@ -323,17 +321,26 @@ public class Node {
                 JSONObject jsonprevnextnode = new JSONObject(line);
                 String prevnighbour = jsonprevnextnode.getString("previous_node");
                 String nxtnode = jsonprevnextnode.getString("next_node");
-
+                System.out.println("failure prevneighbour :" + prevnighbour);
+                System.out.println("failure nextneighbour : " + nxtnode);
 
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // Notify my next neighbor
+        // Update value of my next node with my value as previous
         try {
             tcpSender.startConnection(nextNode, Constants.PORT);
             tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
+            tcpSender.stopConnection();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        // update value of previous node with my value as next
+        try {
+            tcpSender.startConnection(previousNode, Constants.PORT);
+            tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
             tcpSender.stopConnection();
         } catch (UnknownHostException e) {
             e.printStackTrace();
