@@ -371,6 +371,9 @@ public class Node {
         System.out.println("previousnode updated with nextnode value");
     }
 
+    public void CheckForNewFile(){
+        
+    }
     public void starting() {
         String path = "/root/FilesToReplicate";
         File files = new File(path);
