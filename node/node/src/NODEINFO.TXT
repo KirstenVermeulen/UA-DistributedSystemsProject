@@ -1,0 +1,6 @@
+host1.4 ends in .4
+host2.5
+host3.6
+host4.3
+
+volgorde hosts ivm hashfunctie 3.6 , 1.4 , 2.5, 4.3
