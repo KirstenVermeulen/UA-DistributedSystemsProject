@@ -385,12 +385,6 @@ public class Node {
         try {
             // ip voor file ophalen
             int nameHash = Hashing.hash(file.getName());
-//            URL url = new URL("http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash);
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
-//            for (String line; (line = reader.readLine()) != null; ) {
-//                System.out.println(line);
-//                replicationIP += line;
-//            }
             while (nameserver == null) {
                 Thread.onSpinWait();
             }
@@ -399,19 +393,16 @@ public class Node {
             String getrequest = "http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash;
             System.out.println(getrequest);
             URL url = new URL(getrequest);
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
-                for (String line; (line = reader.readLine()) != null; ) {
-                    System.out.println(line);
-                    replicationIP += line;
-                }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+            for (String line; (line = reader.readLine()) != null; ) {
+                System.out.println(line);
+                replicationIP += line;
+            }
 
             tcpSender.startConnection(previousNode, Constants.PORT);
             tcpSender.sendFile(replicationIP, file.getName());
             tcpSender.sendFileData(file);
             tcpSender.stopConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
