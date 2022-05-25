@@ -3,9 +3,15 @@ package ua.node;
 import ua.HTTP.ExitNetwork;
 import ua.HTTP.GetNeighbors;
 import ua.HTTP.JsonBodyHandler;
-import ua.util.*;
+import ua.util.Constants;
+import ua.util.Hashing;
+import ua.util.MulticastPublisher;
+import ua.util.TCPSender;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -180,41 +185,10 @@ public class Node {
             sendTCP(ipAddress, "PREVIOUS", currentNode);
             sendTCP(ipAddress, "NEXT", currentNode);
         }
-/*
-        if (amountOfNodesInNetwork == 3) {
-            if (newHash < myHash) {
-                if (smallesthash) {
-                    //todo send to other node it is the smallest now
-                    smallesthash = false;
-                }
-                if (biggesthash & (previousHash > newHash)) {
-                    nextNode = ipAddress;
-                    nextHash = Hashing.hash(previousNode);
-                } else {
-                    previousNode = ipAddress;
-                    previousHash = Hashing.hash(previousNode);
-                }
-            }
 
-            if (newHash > myHash) {
-                if (biggesthash) {
-                    //todo update new node with biggesthash
-                    biggesthash = false;
-                } if (smallesthash & (nextHash < newHash)) {
-                    previousNode = ipAddress;
-                    previousHash = Hashing.hash(previousNode);
-                } else {
-                    nextNode = ipAddress;
-                    nextHash = Hashing.hash(nextNode);
-                }
-            }
-        }
-
- */
         if (amountOfNodesInNetwork >= 3) {
             if (newHash < myHash) {
                 if (smallesthash) {
-                    //todo send to other node it is the smallest now
                     sendTCP(ipAddress, "SETSMALLEST", null);
                     sendTCP(ipAddress, "NEXT", currentNode);
                     smallesthash = false;
@@ -225,7 +199,6 @@ public class Node {
                     nextNode = ipAddress;
                     nextHash = Hashing.hash(nextNode);
                     sendTCP(ipAddress, "PREVIOUS", currentNode);
-                    //todo update new node with prevnode and nextnode
                 } else if (previousHash < newHash) {
                     previousNode = ipAddress;
                     previousHash = Hashing.hash(previousNode);
@@ -235,7 +208,6 @@ public class Node {
 
             if (newHash > myHash) {
                 if (biggesthash) {
-                    //todo update new node with biggesthash -> true && set own address as previousnode on newnode
                     biggesthash = false;
                     nextNode = ipAddress;
                     nextHash = Hashing.hash(nextNode);
@@ -245,7 +217,6 @@ public class Node {
                 if (smallesthash & (previousHash < newHash)) {
                     previousNode = ipAddress;
                     previousHash = Hashing.hash(previousNode);
-                    //todo update new node with nextnode (and maybe biggesthash to true altho first if statement takes care of this)
                     sendTCP(ipAddress, "NEXT", currentNode);
 
                 } else if (newHash < nextHash) {
@@ -256,37 +227,6 @@ public class Node {
 
             }
         }
-
-
-/*
-        if (myHash == nextHash || (newHash < nextHash && newHash > myHash)) {
-            nextNode = ipAddress;
-
-            // Respond to the node
-            try {
-                tcpSender.startConnection(ipAddress, Constants.PORT);
-                tcpSender.sendMessage("PREVIOUS", InetAddress.getLocalHost().getHostAddress());
-                tcpSender.stopConnection();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (previousHash == myHash || (newHash > previousHash && newHash < myHash)) {
-            previousNode = ipAddress;
-
-            // Respond to the node
-            try {
-                tcpSender.startConnection(ipAddress, Constants.PORT);
-                tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
-                tcpSender.stopConnection();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-        }
-
- */
-
     }
 
     public void sendTCP(String ipAddressNewnode, String type, String ipAddresstogive) {
