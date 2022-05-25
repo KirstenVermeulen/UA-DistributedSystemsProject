@@ -18,18 +18,18 @@ public class PingFailure extends Thread {
                     try {
                         Node.getInstance().sendTCP(previousNode, "PING", null);
                     } catch (Exception e) {
-                        System.out.println("wow deze node bestaat niet xddd");
+                        System.out.println("wow deze prev node bestaat niet xddd");
                         e.printStackTrace();
                         Node.getInstance().failure(previousNode);
                     }
                 }
                 if (nextNode != null) {
                     try {
-                        Node.getInstance().sendTCP(previousNode, "PING", null);
+                        Node.getInstance().sendTCP(nextNode, "PING", null);
                     } catch (Exception e) {
-                        System.out.println("wow deze node bestaat niet xddd");
+                        System.out.println("wow deze next node bestaat niet xddd");
                         e.printStackTrace();
-                        Node.getInstance().failure(previousNode);
+                        Node.getInstance().failure(nextNode);
                     }
 
                 }

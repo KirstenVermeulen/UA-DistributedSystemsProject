@@ -22,13 +22,14 @@ public class TCPSender {
 
     // --- METHODS --- //
 
-    public void startConnection(String ip, int port) {
+    public void startConnection(String ip, int port)  {
         try {
+
             clientSocket = new Socket(ip, port);
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
-//            Node.getInstance().failure(ip);
+            Node.getInstance().failure(ip);
             e.printStackTrace();
         }
     }
