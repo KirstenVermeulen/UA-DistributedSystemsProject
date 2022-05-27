@@ -1,6 +1,10 @@
 package ua.node;
 
-import ua.HTTP.ExitNetwork;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 import ua.HTTP.GetNeighbors;
 import ua.HTTP.JsonBodyHandler;
 import ua.util.Constants;
@@ -247,21 +251,10 @@ public class Node {
 
     public void failure(String failedNode) {
         // Remove Node from network
-        /*
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/ExitNetwork/" + failedNode))
-                .header("accept", "application/json")
-                .build();
-        try {
-            HttpResponse<Supplier<ExitNetwork>> response = httpClient.send(request, new JsonBodyHandler<>(ExitNetwork.class));
-        } catch (IOException | InterruptedException e) {
 
-            e.printStackTrace();
-        }
-*/
         URL urlExitNetwork = null;
         try {
             urlExitNetwork = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/" + failedNode);
-            System.out.println("exitnetworkurl: "+ urlExitNetwork);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -276,24 +269,30 @@ public class Node {
         }
 
         // Get my new neighbors
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + ":8080/NameServer/GetNeighbors"))
-                .header("accept", "application/json")
-                .build();
-
+        URL urlGetNeighbors = null;
         try {
-            HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
-            System.out.println("failure response:" + response);
-
-            System.out.println("failurenextnode:" + response.body().get().next_node);
-            System.out.println("failureprevnode: " + response.body().get().previous_node);
-
-            this.previousNode = response.body().get().previous_node;
-            this.nextNode = response.body().get().next_node;
-
-        } catch (IOException | InterruptedException e) {
+            urlGetNeighbors = new URL("http://" + nameserver + ":8080/NameServer/GetNeighbors");
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlGetNeighbors.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null; ) {
+                System.out.println("GetNeighbors: " + line);
+                JSONObject obj = new JSONObject(line);
+                System.out.println("jsonobj = " +obj);
+                System.out.println("prev = " +obj.getString("previous_node"));
+                System.out.println("next = " +obj.getString("next_node"));
+                this.previousNode = obj.getString("previous_node");
+                this.nextNode = obj.getString("next_node");
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("check if nameserver is running ;) ");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         // Notify my next neighbor
         try {
@@ -303,6 +302,16 @@ public class Node {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        // Notify my previous neighbor
+        try {
+            tcpSender.startConnection(previousNode, Constants.PORT);
+            tcpSender.sendMessage("NEXT", InetAddress.getLocalHost().getHostAddress());
+            tcpSender.stopConnection();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public void shutdown() throws MalformedURLException {
