@@ -174,7 +174,6 @@ public class Node {
             nextHash = Hashing.hash(nextNode);
             previousHash = Hashing.hash(previousNode);
             if (newHash < myHash) {
-                //todo send to other node it is the smallest now
                 sendTCP(ipAddress, "SETSMALLEST", null);
                 biggesthash = true;
             } else {
@@ -248,25 +247,45 @@ public class Node {
 
     public void failure(String failedNode) {
         // Remove Node from network
+        /*
         HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/ExitNetwork/" + failedNode))
                 .header("accept", "application/json")
                 .build();
         try {
             HttpResponse<Supplier<ExitNetwork>> response = httpClient.send(request, new JsonBodyHandler<>(ExitNetwork.class));
         } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+        }
+*/
+        URL urlExitNetwork = null;
+        try {
+            urlExitNetwork = new URL("http://" + nameserver + ":8080/NameServer/ExitNetwork/" + failedNode);
+            System.out.println("exitnetworkurl: "+ urlExitNetwork);
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlExitNetwork.openStream(), "UTF-8"))) {
+            for (String line; (line = reader.readLine()) != null; ) {
+                System.out.println("failure: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("check if nameserver is running ;) ");
+        }
+
         // Get my new neighbors
-        request = HttpRequest.newBuilder(URI.create("http://" + nameserver + "/NameServer/GetNeighbors"))
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://" + nameserver + ":8080/NameServer/GetNeighbors"))
                 .header("accept", "application/json")
                 .build();
 
         try {
             HttpResponse<Supplier<GetNeighbors>> response = httpClient.send(request, new JsonBodyHandler<>(GetNeighbors.class));
+            System.out.println("failure response:" + response);
 
-            System.out.println(response.body().get().next_node);
-            System.out.println(response.body().get().previous_node);
+            System.out.println("failurenextnode:" + response.body().get().next_node);
+            System.out.println("failureprevnode: " + response.body().get().previous_node);
 
             this.previousNode = response.body().get().previous_node;
             this.nextNode = response.body().get().next_node;

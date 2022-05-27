@@ -193,15 +193,15 @@ public class NameServer {
 
     public String getNeighbors(String ip) {
         int hash = hash(ip);
-        String prev_node = null;
+        String previous_node = null;
         String next_node = null;
         Object[] keys = ipMap.keySet().toArray();
         for (int i = 0; i < keys.length; i++) {
             if (hash == (int) keys[i]) {
                 if (i == 0) {
-                    prev_node = ipMap.get((int) keys[keys.length - 1]);
+                    previous_node = ipMap.get((int) keys[keys.length - 1]);
                 } else {
-                    prev_node = ipMap.get((int) keys[i - 1]);
+                    previous_node = ipMap.get((int) keys[i - 1]);
                 }
                 if (i == keys.length - 1) {
                     next_node = ipMap.get((int) keys[0]);
@@ -211,7 +211,7 @@ public class NameServer {
             }
         }
         return "{" +
-                "\"previous_node\": \"" + prev_node + "\"," +
+                "\"previous_node\": \"" + previous_node + "\"," +
                 "\"next_node\": \"" + next_node + "\"" +
                 "}";
     }
