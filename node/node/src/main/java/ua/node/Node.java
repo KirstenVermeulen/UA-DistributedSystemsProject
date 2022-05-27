@@ -149,21 +149,16 @@ public class Node {
         ipAddress = ipAddress.replace("/", "");
 
         int amountOfNodesInNetwork = 1;
-     /*
-        int myHash = Hashing.hash(currentNode);
-        int nextHash = Hashing.hash(nextNode);
-        int previousHash = Hashing.hash(previousNode);
-     */
 
         int myHash = Hashing.hash(currentNode);
         int nextHash = Hashing.hash(nextNode);
-        ;
+
         int previousHash = Hashing.hash(previousNode);
         int newHash = Hashing.hash(ipAddress);
 
-        URL urlshutdown = new URL("http://" + nameserver + ":8080/NameServer/AmountOfNodes");
+        URL amountofnodes = new URL("http://" + nameserver + ":8080/NameServer/AmountOfNodes");
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlshutdown.openStream(), "UTF-8"))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(amountofnodes.openStream(), "UTF-8"))) {
             for (String line; (line = reader.readLine()) != null; ) {
                 amountOfNodesInNetwork = Integer.parseInt(line);
             }
