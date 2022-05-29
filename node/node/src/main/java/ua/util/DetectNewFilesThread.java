@@ -29,8 +29,8 @@ public class DetectNewFilesThread extends Thread {
                         for (File file : Objects.requireNonNull(files.listFiles())) {
                             for (String sfile: starterfiles){
                                 if (file.getName()!= sfile){
-                                    
-                                    nodereference.ReplicateFile(file);
+                                    // Needs to be referenced
+                                    //nodereference.ReplicateFile(file);
                                 }
                             }
                         }
