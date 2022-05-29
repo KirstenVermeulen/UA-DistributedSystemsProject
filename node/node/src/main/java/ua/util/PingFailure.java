@@ -7,6 +7,7 @@ import java.net.InetAddress;
 public class PingFailure extends Thread {
 
     int countunreachable = 0;
+    TCPSender tcpSender = new TCPSender();
 
     public void start() {
         while(true) {
@@ -16,7 +17,7 @@ public class PingFailure extends Thread {
 
                 if (previousNode != null) {
                     try {
-                        Node.getInstance().sendTCP(previousNode, "PING", null);
+                        tcpSender.sendTCP(previousNode, "PING", null);
                     } catch (Exception e) {
                         System.out.println("wow deze prev node bestaat niet xddd");
                         e.printStackTrace();
@@ -25,7 +26,7 @@ public class PingFailure extends Thread {
                 }
                 if (nextNode != null) {
                     try {
-                        Node.getInstance().sendTCP(nextNode, "PING", null);
+                        tcpSender.sendTCP(nextNode, "PING", null);
                     } catch (Exception e) {
                         System.out.println("wow deze next node bestaat niet xddd");
                         e.printStackTrace();
@@ -36,7 +37,7 @@ public class PingFailure extends Thread {
                 System.out.println("previousNode " + previousNode);
                 System.out.println("nextNode " + nextNode);
                 System.out.println("own ip " + InetAddress.getLocalHost().getHostAddress());
-                System.out.println("Isbiggest: " + Node.getInstance().isBiggesthash() + "\n IsSmallest" + Node.getInstance().isSmallesthash());
+                //System.out.println("Isbiggest: " + Node.getInstance().isBiggesthash() + "\n IsSmallest" + Node.getInstance().isSmallesthash());
 
                 System.out.println("countunreachable " + countunreachable);
             } catch (Exception e) {

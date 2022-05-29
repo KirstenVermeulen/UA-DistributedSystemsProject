@@ -24,14 +24,17 @@ public class MulticastReceiver extends Thread {
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
+
                 String data = new String(packet.getData(), packet.getOffset(), packet.getLength());
-                System.out.println("data multicastreceiver: " + data);
+
+                System.out.println("Multicast receiver data: " + data);
+
                 String[] msg = data.split(":");
 
                 if (msg[0].equals("END")) {
                     break;
                 } else if (msg[0].equals("JOIN")) {
-                    Node.getInstance().nodeJoined(String.valueOf(packet.getAddress()));
+                    Node.getInstance().getLifeCycle().nodeJoined(String.valueOf(packet.getAddress()));
                 } else {
                     System.out.println("Not a valid packet type");
                 }
