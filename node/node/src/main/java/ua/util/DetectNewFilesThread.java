@@ -15,12 +15,31 @@ public class DetectNewFilesThread extends Thread {
 
         // This will get the files that were first captured when initializing a node
         ArrayList<String> starterfiles = nodereference.getStartFiles();
-        ArrayList<String> currentfiles = nodereference.getStartFiles();
-        Boolean firstTimeCheck = true;
 
         while (true){
+
             File files = new File(Constants.path);
-            Collections.sort(starterfiles);
+            try {
+                if (!files.exists()) {
+                    // folder is empty so create folder
+                    Files.createDirectories(Paths.get(Constants.path));
+                } else {
+                    // loop through all files
+                    if (files.listFiles() != null) {
+                        for (File file : Objects.requireNonNull(files.listFiles())) {
+                            for (String sfile: starterfiles){
+                                if (file.getName()!= sfile){
+                                    
+                                    nodereference.ReplicateFile(file);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
 
             // Regular interval every 0,5 seconds
             try {

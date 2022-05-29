@@ -162,6 +162,7 @@ public class NameServer {
                 tempreplicatednodeslist.add(nodehash);
             }
         }
+        // Edge case
         if (tempreplicatednodeslist.isEmpty())
         {
             Map.Entry<Integer, String> entryWithMaxKey = null;
