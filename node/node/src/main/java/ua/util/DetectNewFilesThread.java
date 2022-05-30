@@ -30,7 +30,8 @@ public class DetectNewFilesThread extends Thread {
                             for (String sfile: starterfiles){
                                 if (file.getName()!= sfile){
                                     // Needs to be referenced
-                                    //nodereference.ReplicateFile(file);
+                                    nodereference.ReplicateFile(file);
+                                    starterfiles.add(file.getName());
                                 }
                             }
                         }

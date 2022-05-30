@@ -2,7 +2,7 @@
   <configuration default="false" name="Node 4" type="Application" factoryName="Application" folderName="Remote">
     <option name="MAIN_CLASS_NAME" value="ua.node.Main" />
     <module name="node" />
-    <target name="Node 4" />
+    <target name="Node4" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
