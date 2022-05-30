@@ -1,24 +1,34 @@
 package ua.node;
 
+import ua.util.DetectNewFilesThread;
 import ua.util.MulticastReceiver;
 import ua.util.PingFailure;
 import ua.util.TCPReceiver;
 
 public class Main {
     public static void main(String[] args) {
-        // --- TCP listener thread --- //
-        TCPReceiver server = new TCPReceiver();
-        server.start();
 
-        Node.getInstance();
-        Node.getInstance().discovery();
-        Node.getInstance().starting();
+        // Create a Node object
+        Node node = Node.getInstance();
 
-        // --- Multicast listener thread --- //
-        MulticastReceiver receiver = new MulticastReceiver();
-        receiver.start();
+        // Start listening for incoming TCP requests
+        TCPReceiver tcpReceiver = new TCPReceiver();
+        tcpReceiver.start();
 
+        node.initNode();
+        //node.discovery();
+        node.starting();
+
+        // Start listening for incoming multicast messages
+        MulticastReceiver multicastReceiver = new MulticastReceiver();
+        multicastReceiver.start();
+
+        // Start checking of other nodes are still alive
         PingFailure pingFailure = new PingFailure();
         pingFailure.start();
+
+        // Start checking for new files
+        DetectNewFilesThread detectNewFilesThread = new DetectNewFilesThread();
+        //detectNewFilesThread.run();
     }
 }

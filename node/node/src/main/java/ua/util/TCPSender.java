@@ -16,11 +16,14 @@ public class TCPSender {
     // --- CONSTRUCTOR --- //
 
     public TCPSender() {
-
     }
 
-
     // --- METHODS --- //
+    public void sendTCP(String ipToConnect, String type, String message) {
+        startConnection(ipToConnect, Constants.PORT);
+        sendMessage(type, message);
+        stopConnection();
+    }
 
     public void startConnection(String ip, int port)  {
         try {

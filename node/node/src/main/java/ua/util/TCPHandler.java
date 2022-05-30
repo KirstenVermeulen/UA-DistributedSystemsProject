@@ -22,6 +22,8 @@ public class TCPHandler implements Runnable {
 
         try {
 
+            Node node = Node.getInstance();
+
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
@@ -33,20 +35,22 @@ public class TCPHandler implements Runnable {
                 if (msg[0].equals("END")) {
                     break;
                 } else if (msg[0].equals("PREVIOUS")) {
-                    Node.getInstance().setPreviousNode(msg[1]);
+                    node.setPreviousNode(msg[1]);
                 } else if (msg[0].equals("NEXT")) {
-                    Node.getInstance().setNextNode(msg[1]);
+                    node.setNextNode(msg[1]);
                 } else if (msg[0].equals("NUMBEROFNODES")) {
-                    Node.getInstance().setNameserver(clientSocket.getInetAddress().getHostAddress());
-                    Node.getInstance().checkIfAlone(Integer.parseInt(msg[1]));
+                    node.setNameserver(clientSocket.getInetAddress().getHostAddress());
+                    node.getLifeCycle().checkIfAlone(Integer.parseInt(msg[1]));
                 } else if (msg[0].equals("SETSMALLEST")) {
-                    Node.getInstance().setSmallesthash(true);
+                    node.setSmallest(true);
+                    node.setBiggest(false);
                 } else if (msg[0].equals("PING")) {
                     //so it does not throw error
                 } else if (msg[0].equals("SETBIGGEST")) {
-                    Node.getInstance().setBiggesthash(true);
+                    node.setSmallest(false);
+                    node.setBiggest(true);
                 } else if (msg[0].equals("SHUTDOWN")) {
-                    Node.getInstance().shutdown();
+                    node.getLifeCycle().shutdown();
                 } else if (msg[0].equals("FILETRANSFER")) {
                     // format = type, ReceiverNodeIP, SenderNodeIP, FileName
                     // file wegschrijven naar temp folder
@@ -64,7 +68,7 @@ public class TCPHandler implements Runnable {
                     output.close();
                     is.close();
 
-                    Node.getInstance().FileTransfer(msg);
+                    node.FileTransfer(msg);
                 } else {
                     System.out.println("Not a valid packet type");
                 }

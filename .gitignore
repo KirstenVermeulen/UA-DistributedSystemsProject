@@ -101,7 +101,12 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 .idea
+/node/remote node1.run.xml
+/node/remote node2.run.xml
+/node/remote node3.run.xml
+/node/remote node4.run.xml
 node/node/remote node1.run.xml
 node/node/remote node2.run.xml
 node/node/remote node3.run.xml
 node/node/remote node4.run.xml
+node/node/DebugConfigs/
