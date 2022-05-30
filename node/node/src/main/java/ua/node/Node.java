@@ -375,11 +375,14 @@ public class Node {
             }
             // don't send file to ourselves
             if (!replicationIP.equals(currentNode)){
-                tcpSender.startConnection(previousNode, Constants.PORT);
+                tcpSender.startConnection(nextNode, Constants.PORT);
                 tcpSender.sendFile(replicationIP, file.getName());
                 tcpSender.sendFileData(file);
                 tcpSender.stopConnection();
                 startfilenames.add(file.getName());
+            }
+            else{
+                System.out.println("Received own IP!");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -388,6 +391,7 @@ public class Node {
 
     public void FileTransfer(String[] msg) {
         File file = new File("/root/tempTransferFiles/" + msg[3]);
+        System.out.println("Created temp file /root/tempTransferFiles/" + msg[3]);
         // check if sender ip equals our own ip
         if (msg[2].equals(Node.getInstance().getCurrentNode())) {
             // we got our own file back -> something went wrong, try again
@@ -396,14 +400,14 @@ public class Node {
         } else if (msg[1].equals(Node.getInstance().getCurrentNode())) {
             // file was meant for this node -> write to disc -> move from temp folder to replicated folder
             try {
-                Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/FilesToReplicate/" + msg[3]));
+                Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/ReplicateFiles/" + msg[3]));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
             // file was not meant for this node -> transmit to next_node
             tcpSender.startConnection(nextNode, Constants.PORT);
-            tcpSender.sendFile(msg[2], msg[3]);
+            tcpSender.sendFile(msg[1], msg[3]);
             tcpSender.sendFileData(file);
             tcpSender.stopConnection();
 

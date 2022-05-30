@@ -48,6 +48,7 @@ public class TCPHandler implements Runnable {
                 } else if (msg[0].equals("SHUTDOWN")) {
                     Node.getInstance().shutdown();
                 } else if (msg[0].equals("FILETRANSFER")) {
+                    // format = type, ReceiverNodeIP, SenderNodeIP, FileName
                     // file wegschrijven naar temp folder
                     // controleren of we temp file kunnen wegschrijven
                     checkTempFolder();
