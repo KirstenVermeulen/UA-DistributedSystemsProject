@@ -105,11 +105,10 @@ public class Node {
         return previousNode;
     }
 
-    public ArrayList<String> getStartFiles(){
-        if (startfilenames!=null){
+    public ArrayList<String> getStartFiles() {
+        if (startfilenames != null) {
             return startfilenames;
-        }
-        else{
+        } else {
             return null;
         }
     }
@@ -171,9 +170,9 @@ public class Node {
             for (String line; (line = reader.readLine()) != null; ) {
                 System.out.println("GetNeighbors: " + line);
                 JSONObject obj = new JSONObject(line);
-                System.out.println("jsonobj = " +obj);
-                System.out.println("prev = " +obj.getString("previous_node"));
-                System.out.println("next = " +obj.getString("next_node"));
+                System.out.println("jsonobj = " + obj);
+                System.out.println("prev = " + obj.getString("previous_node"));
+                System.out.println("next = " + obj.getString("next_node"));
                 this.previousNode = obj.getString("previous_node");
                 this.nextNode = obj.getString("next_node");
 
@@ -223,31 +222,34 @@ public class Node {
 
     public void ReplicateFile(File file) {
         try {
-            // ip voor file ophalen
+            // get ip of file
             int nameHash = Hashing.hash(file.getName());
-            while (nameserver == null) {
+            // wait for nameserver and nextnode ip to be initialized
+            while ((nameserver == null)||(nextNode == null)) {
                 Thread.onSpinWait();
             }
-            // extract ip from responds
-            String replicationIP = "";
-            String getrequest = "http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash;
-            System.out.println(getrequest);
-            URL url = new URL(getrequest);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
-            for (String line; (line = reader.readLine()) != null; ) {
-                System.out.println(line);
-                replicationIP += line;
-            }
-            // don't send file to ourselves
-            if (!replicationIP.equals(currentNode)){
-                tcpSender.startConnection(nextNode, Constants.PORT);
-                tcpSender.sendFile(replicationIP, file.getName());
-                tcpSender.sendFileData(file);
-                tcpSender.stopConnection();
-                startfilenames.add(file.getName());
-            }
-            else{
-                System.out.println("Received own IP!");
+            if (!currentNode.equals(nextNode)) {
+                // extract ip from responds
+                String replicationIP = "";
+                String getrequest = "http://" + nameserver + ":8080/NameServer/ReplicateHashFile/" + nameHash;
+                //System.out.println(getrequest);
+                URL url = new URL(getrequest);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+                for (String line; (line = reader.readLine()) != null; ) {
+                    System.out.println(line);
+                    replicationIP += line;
+                }
+                // don't send file to ourselves
+                if (!replicationIP.equals(currentNode)) {
+                    System.out.println("Starting replication from: "+currentNode+" to: "+replicationIP+" via: "+nextNode);
+                    tcpSender.startConnection(nextNode, Constants.PORT);
+                    tcpSender.sendFile(replicationIP, file.getName());
+                    tcpSender.sendFileData(file);
+                    tcpSender.stopConnection();
+                    startfilenames.add(file.getName());
+                } else {
+                    System.out.println("Received own IP!");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -266,6 +268,7 @@ public class Node {
             // file was meant for this node -> write to disc -> move from temp folder to replicated folder
             try {
                 Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/ReplicateFiles/" + msg[3]));
+                file.delete(); // remove  from temp folder
             } catch (IOException e) {
                 e.printStackTrace();
             }

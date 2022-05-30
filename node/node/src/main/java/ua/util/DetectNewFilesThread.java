@@ -17,7 +17,6 @@ public class DetectNewFilesThread extends Thread {
         ArrayList<String> starterfiles = nodereference.getStartFiles();
 
         while (true){
-
             File files = new File(Constants.path);
             try {
                 if (!files.exists()) {
