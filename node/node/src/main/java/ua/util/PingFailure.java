@@ -9,7 +9,7 @@ public class PingFailure extends Thread {
     int countunreachable = 0;
     TCPSender tcpSender = new TCPSender();
 
-    public void start() {
+    public void run() {
         while(true) {
             try {
                 String previousNode = Node.getInstance().getPreviousNode();

@@ -50,6 +50,8 @@ public class Node {
         try {
             currentNode = InetAddress.getLocalHost().getHostAddress();
             nodeName = InetAddress.getLocalHost().getHostName();
+            nextNode = currentNode;
+            previousNode = currentNode;
 
         } catch (UnknownHostException e) {
 
@@ -198,34 +200,14 @@ public class Node {
         }
     }
 
-    public void starting() {
 
-        File files = new File(Constants.path);
-        try {
-            if (!files.exists()) {
-                // folder is empty so create folder
-                Files.createDirectories(Paths.get(Constants.path));
-            } else {
-                // loop through all files
-                if (files.listFiles() != null) {
-                    for (File file : Objects.requireNonNull(files.listFiles())) {
-                        // share file
-                        System.out.println(file.getAbsolutePath());
-                        ReplicateFile(file);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void ReplicateFile(File file) {
         try {
             // get ip of file
             int nameHash = Hashing.hash(file.getName());
             // wait for nameserver and nextnode ip to be initialized
-            while ((nameserver == null)||(nextNode == null)) {
+            while (nameserver == null) {
                 Thread.onSpinWait();
             }
             if (!currentNode.equals(nextNode)) {
@@ -248,7 +230,7 @@ public class Node {
                     tcpSender.stopConnection();
                     startfilenames.add(file.getName());
                 } else {
-                    System.out.println("Received own IP!");
+                    System.out.println("Skipping replication of: "+file.getName()+", received own IP");
                 }
             }
         } catch (Exception e) {
