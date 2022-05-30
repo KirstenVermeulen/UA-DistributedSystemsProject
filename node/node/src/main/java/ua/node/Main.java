@@ -29,6 +29,6 @@ public class Main {
 
         // Start checking for new files
         DetectNewFilesThread detectNewFilesThread = new DetectNewFilesThread();
-        //detectNewFilesThread.run();
+        detectNewFilesThread.run();
     }
 }

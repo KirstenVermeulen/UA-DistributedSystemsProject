@@ -1,9 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="NameserverApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" />
     <module name="nameserver" />
-    <target name="Nameserver" />
+    <projectPathOnTarget name="projectPathOnTarget" value="/nameserver" />
+    <target name="root@dist-computing.idlab.uantwerpen.be:10080" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ua.nameserver.NameserverApplication" />
+    <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
