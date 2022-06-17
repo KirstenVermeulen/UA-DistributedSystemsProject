@@ -39,12 +39,15 @@ public class TCPSender {
 
     public void sendMessage(String type, String content) {
         String msg = String.format("%s:%s", type, content);
+        System.out.println(msg);
         out.println(msg);
     }
 
     public void sendFile(String receiverip, String filename) {
         // type:receiverip:senderip:filename
+        // format = type, ReceiverNodeIP, SenderNodeIP, FileName
         String msg = String.format("%s:%s:%s:%s", "FILETRANSFER", receiverip, Node.getInstance().getCurrentNode(), filename);
+        System.out.println(msg);
         out.println(msg);
     }
 
@@ -70,7 +73,7 @@ public class TCPSender {
                 contents = new byte[size];
                 bis.read(contents, 0, size);
                 os.write(contents);
-                System.out.print("Sending file " + file.getName() + " ... " + (current * 100) / fileLength + "% complete!");
+                System.out.print("Sending file " + file.getName() + " To: "+ clientSocket.getRemoteSocketAddress() + " ... " + (current * 100) / fileLength + "% complete!");
             }
             os.flush();
             os.close();

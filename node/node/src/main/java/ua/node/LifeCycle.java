@@ -127,6 +127,9 @@ public class LifeCycle {
 
         if (nodesInNetwork == 2) {
 
+            node.setPreviousNode(ipAddress);
+            node.setNextNode(ipAddress);
+
             if (newNodeHash < myNodeHash) {
                 sender.sendTCP(ipAddress, "SETSMALLEST", null);
                 node.setBiggest(true);
@@ -152,14 +155,17 @@ public class LifeCycle {
                     sender.sendTCP(ipAddress, "SETSMALLEST", null);
                     sender.sendTCP(ipAddress, "NEXT", currentNode);
 
+                    node.setPreviousNode(ipAddress);
                     node.setSmallest(false);
 
                 } else if (node.isBiggest() & (nextNodeHash > newNodeHash)) {
                     sender.sendTCP(ipAddress, "SETSMALLEST", null);
                     sender.sendTCP(ipAddress, "PREVIOUS", currentNode);
 
+                    node.setNextNode(ipAddress);
                 } else if (previousNodeHash < newNodeHash) {
                     sender.sendTCP(ipAddress, "NEXT", currentNode);
+                    node.setPreviousNode(ipAddress);
                 }
             }
 
@@ -168,14 +174,17 @@ public class LifeCycle {
                     sender.sendTCP(ipAddress, "SETBIGGEST", null);
                     sender.sendTCP(ipAddress, "PREVIOUS", currentNode);
 
+                    node.setNextNode(ipAddress);
                     node.setBiggest(false);
                 }
                 if (node.isSmallest() & (previousNodeHash < newNodeHash)) {
                     sender.sendTCP(ipAddress, "SETBIGGEST", null);
                     sender.sendTCP(ipAddress, "NEXT", currentNode);
 
+                    node.setPreviousNode(ipAddress);
                 } else if (newNodeHash < nextNodeHash) {
                     sender.sendTCP(ipAddress, "PREVIOUS", currentNode);
+                    node.setNextNode(ipAddress);
                 }
 
             }

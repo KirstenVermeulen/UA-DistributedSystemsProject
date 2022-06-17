@@ -17,7 +17,6 @@ public class Main {
 
         node.initNode();
         //node.discovery();
-        node.starting();
 
         // Start listening for incoming multicast messages
         MulticastReceiver multicastReceiver = new MulticastReceiver();
@@ -29,6 +28,6 @@ public class Main {
 
         // Start checking for new files
         DetectNewFilesThread detectNewFilesThread = new DetectNewFilesThread();
-        //detectNewFilesThread.run();
+        detectNewFilesThread.start();
     }
 }

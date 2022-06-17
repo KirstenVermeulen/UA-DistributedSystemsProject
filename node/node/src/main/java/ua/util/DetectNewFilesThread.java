@@ -9,15 +9,13 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class DetectNewFilesThread extends Thread {
-    public void run(){
+    public void run() {
         System.out.println("Detecting new files thread is running...");
         Node nodereference = Node.getInstance();
 
         // This will get the files that were first captured when initializing a node
-        ArrayList<String> starterfiles = nodereference.getStartFiles();
 
-        while (true){
-
+        while (true) {
             File files = new File(Constants.path);
             try {
                 if (!files.exists()) {
@@ -27,11 +25,16 @@ public class DetectNewFilesThread extends Thread {
                     // loop through all files
                     if (files.listFiles() != null) {
                         for (File file : Objects.requireNonNull(files.listFiles())) {
-                            for (String sfile: starterfiles){
-                                if (file.getName()!= sfile){
-                                    // Needs to be referenced
-                                    //nodereference.ReplicateFile(file);
+                            boolean replicate = true;
+                            for (String sfile : nodereference.getStartFiles()) {
+                                if (file.getName().equals(sfile)) {
+                                    replicate = false;
                                 }
+                            }
+                            if (replicate){
+                                // Needs to be replicated
+                                //System.out.println("New file detected: " + file.getName());
+                                nodereference.ReplicateFile(file);
                             }
                         }
                     }
@@ -39,8 +42,6 @@ public class DetectNewFilesThread extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
             // Regular interval every 0,5 seconds
             try {
                 Thread.sleep(500);

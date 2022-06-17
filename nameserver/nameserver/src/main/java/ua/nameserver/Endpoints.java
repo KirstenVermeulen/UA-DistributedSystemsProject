@@ -27,7 +27,9 @@ public class Endpoints {
     @GetMapping("/ReplicateHashFile/{hash}")
     public String replicateHashFile(@PathVariable("hash") int filehash) {
         System.out.println("Checking replication ip of file: " + filehash);
-        return namingServer.CheckIfReplicatedNode(filehash);
+        String ip = namingServer.CheckIfReplicatedNode(filehash);
+        System.out.println("Replication ip of file = " + ip);
+        return ip;
     }
 
     @GetMapping("/JoinNetwork")
@@ -64,7 +66,9 @@ public class Endpoints {
 
     @GetMapping("/GetFileIp/{filename}")
     public String getfileIp(@PathVariable("filename") String fileName) {
-        return namingServer.getFileIp(fileName);
+        String ip = namingServer.getFileIp(fileName);
+        System.out.println("Replication ip of file = " + ip);
+        return ip;
     }
 
     @GetMapping("/GetNeighbors")
