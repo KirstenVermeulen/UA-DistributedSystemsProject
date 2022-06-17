@@ -76,6 +76,8 @@ public class LifeCycle {
         //update previous node with value of next node
         tcpSender.sendTCP(previousNode, "NEXT", nextNode);
         System.out.println("Previous node updated with next node value");
+
+        System.exit(0);
     }
 
     public void nodeJoined(String ipAddress) {

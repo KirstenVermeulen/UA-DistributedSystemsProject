@@ -22,6 +22,12 @@ public class TCPSender {
         }
     }
 
+    public void sendTCP(String ipToConnect, String type, String message) {
+        startConnection(ipToConnect, Constants.PORT);
+        sendMessage(type, message);
+        stopConnection();
+    }
+
     public void sendMessage(String type, String content) {
         String msg = String.format("%s:%s", type, content);
         out.println(msg);

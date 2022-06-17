@@ -3,15 +3,20 @@ package ua.nameserver;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.util.Constants;
+import ua.util.TCPSender;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 
 @RestController
 @RequestMapping("/NameServer")
 public class Endpoints {
 
     private NameServer namingServer = NameServer.getInstance();
-
+    private  TCPSender tcpSender = new TCPSender();
     @PutMapping("/UpdateServerFiles")
     @ResponseStatus(code = HttpStatus.OK, reason = "OK")
     public ResponseEntity<String> updateServerFiles() {
@@ -83,5 +88,18 @@ public class Endpoints {
     public String getIpMap() {
         System.out.println("Getting the ipmap");
         return namingServer.getIpMapData();
+    }
+
+    @GetMapping("/shutdown/{ip}")
+    public String shutdown(@PathVariable("ip") String ip) {
+        System.out.println("shutdown to " + ip);
+        try {
+            NameServer.getInstance().getTcpSender().sendTCP(ip,"SHUTDOWN", InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return "error";
+
+        }
+        return "shutdown send";
     }
 }

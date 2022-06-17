@@ -50,6 +50,7 @@ public class TCPHandler implements Runnable {
                     node.setSmallest(false);
                     node.setBiggest(true);
                 } else if (msg[0].equals("SHUTDOWN")) {
+                    System.out.println("shutdown recieved");
                     node.getLifeCycle().shutdown();
                 } else if (msg[0].equals("FILETRANSFER")) {
                     // file wegschrijven naar temp folder
