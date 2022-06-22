@@ -249,6 +249,12 @@ public class Node {
         } else if (msg[1].equals(Node.getInstance().getCurrentNode())) {
             // file was meant for this node -> write to disc -> move from temp folder to replicated folder
             try {
+                // check if ReplicateFiles folder exists
+                File replicatefilespath = new File("/root/ReplicateFiles/");
+                if (!replicatefilespath.exists()) {
+                    // create folder
+                    Files.createDirectories(Paths.get("/root/ReplicateFiles/"));
+                }
                 Files.move(Paths.get(file.getAbsolutePath()), Paths.get("/root/ReplicateFiles/" + msg[3]));
                 file.delete(); // remove  from temp folder
             } catch (IOException e) {
